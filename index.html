@@ -2,39 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hello World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachers' Lounge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .phone {
+      width: 390px;
+      min-height: 844px;
+      background: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: sans-serif;
-      background: #f0f0f0;
+      padding: 40px 32px 60px;
+      position: relative;
     }
-    h1 {
-      margin-bottom: 24px;
-      font-size: 2.5rem;
-      color: #222;
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 48px;
     }
-    button {
-      padding: 12px 28px;
-      font-size: 1rem;
+
+    .mugs {
+      font-size: 80px;
+      line-height: 1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      position: relative;
+    }
+
+    .apple-leaf {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+    }
+
+    .app-name {
+      font-family: 'Caveat', cursive;
+      font-size: 42px;
+      font-weight: 700;
+      color: #1a6b72;
+      text-align: center;
+      line-height: 1.15;
+      margin-top: 12px;
+    }
+
+    .buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 50px;
+      font-size: 17px;
+      font-weight: 600;
       cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background: #4f46e5;
-      color: white;
+      transition: opacity 0.2s;
     }
-    button:hover {
-      background: #4338ca;
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #1a6b72;
+      color: #1a6b72;
+    }
+
+    .btn-filled {
+      background: #1a6b72;
+      border: 2px solid #1a6b72;
+      color: #fff;
     }
   </style>
 </head>
 <body>
-  <h1>Hello World</h1>
-  <button onclick="alert('You clicked me')">Click Me</button>
+  <div class="phone">
+    <div class="logo-area">
+      <div class="mugs">
+        <span class="apple-leaf">🍏</span>
+        ☕☕
+      </div>
+      <div class="app-name">Teachers'<br>Lounge</div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-outline">Log In</button>
+      <button class="btn btn-filled">Sign Up</button>
+    </div>
+  </div>
 </body>
 </html>
