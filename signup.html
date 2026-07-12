@@ -518,8 +518,21 @@
         </div>
 
         <div class="clearfix">
-          <button class="btn-next" onclick="alert('Sign up complete! Welcome to Teachers\' Lounge 🎉')">Next →</button>
+          <button class="btn-next" onclick="goTo(6)">Next →</button>
         </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: Welcome -->
+    <div class="screen" id="screen-6">
+      <div class="top-nav">
+        <button class="back-btn" onclick="goBack(6)">←</button>
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+      <div class="screen-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;">
+        <h2 style="font-size:28px;margin-bottom:32px;">Welcome!</h2>
+        <img src="assets/Teacher'sLoungeLogo 2.png" alt="Teachers' Lounge Logo" style="width:200px;margin-bottom:48px;">
+        <button class="btn-next" style="float:none;width:100%;justify-content:center;" onclick="window.location.href='home.html'">Explore Teachers' Lounge →</button>
       </div>
     </div>
 
