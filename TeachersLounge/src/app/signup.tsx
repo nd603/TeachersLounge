@@ -74,13 +74,19 @@ export default function SignupScreen() {
         return;
       }
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { first_name: firstName, last_name: lastName } },
-      });
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { first_name: firstName, last_name: lastName } },
+        });
+        if (error) { Alert.alert('Sign up error', error.message); setLoading(false); return; }
+      } catch (e: any) {
+        Alert.alert('Sign up error', e?.message ?? 'Something went wrong. Check your connection.');
+        setLoading(false);
+        return;
+      }
       setLoading(false);
-      if (error) { Alert.alert('Sign up error', error.message); return; }
     }
 
     if (step < TOTAL_STEPS) setStep(step + 1);
