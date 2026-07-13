@@ -1,11 +1,28 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Missing fields', 'Please enter your email and password.');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) { Alert.alert('Login failed', error.message); return; }
+    router.replace('/(tabs)/home');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -18,16 +35,29 @@ export default function LoginScreen() {
       <View style={styles.form}>
         <View style={styles.field}>
           <Text style={styles.label}>Email</Text>
-          <TextInput style={styles.input} placeholder="user@school.edu" keyboardType="email-address" autoCapitalize="none" />
+          <TextInput
+            style={styles.input}
+            placeholder="user@school.edu"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
         </View>
         <View style={styles.field}>
           <Text style={styles.label}>Password</Text>
-          <TextInput style={styles.input} placeholder="Password" secureTextEntry />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
         </View>
       </View>
 
-      <TouchableOpacity style={styles.btnFilled} onPress={() => router.replace('/(tabs)/home')}>
-        <Text style={styles.btnFilledText}>Log In</Text>
+      <TouchableOpacity style={[styles.btnFilled, loading && { opacity: 0.6 }]} onPress={handleLogin} disabled={loading}>
+        <Text style={styles.btnFilledText}>{loading ? 'Logging in…' : 'Log In'}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

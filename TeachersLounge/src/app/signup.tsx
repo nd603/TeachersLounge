@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Switch,
@@ -12,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
 
 const TOTAL_STEPS = 6;
 
@@ -35,12 +37,51 @@ const ALL_TOPICS = [
 export default function SignupScreen() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  // Form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [schoolName, setSchoolName] = useState('');
+  const [yearsTeaching, setYearsTeaching] = useState('');
+  const [verifyCode, setVerifyCode] = useState('');
+
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [recommendEnabled, setRecommendEnabled] = useState(true);
   const [privateProfile, setPrivateProfile] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>(['first-year']);
 
-  const goNext = () => {
+  const goNext = async () => {
+    if (step === 1) {
+      if (!firstName || !lastName || !email || !password) {
+        Alert.alert('Missing fields', 'Please fill in all required fields.');
+        return;
+      }
+      if (!email.endsWith('.edu')) {
+        Alert.alert('Invalid email', 'Please use a .edu email address.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        Alert.alert('Password mismatch', 'Passwords do not match.');
+        return;
+      }
+      if (password.length < 8) {
+        Alert.alert('Weak password', 'Password must be at least 8 characters.');
+        return;
+      }
+      setLoading(true);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { first_name: firstName, last_name: lastName } },
+      });
+      setLoading(false);
+      if (error) { Alert.alert('Sign up error', error.message); return; }
+    }
+
     if (step < TOTAL_STEPS) setStep(step + 1);
     else router.replace('/(tabs)/home');
   };
@@ -75,12 +116,12 @@ export default function SignupScreen() {
         {step === 1 && (
           <View>
             <Text style={styles.stepTitle}>Sign Up</Text>
-            <Field label="First Name*" value="Daniella" />
+            <Field label="First Name*" value={firstName} onChangeText={setFirstName} placeholder="First name" />
             <Field label="Middle Name" placeholder="Enter your middle name" />
-            <Field label="Last Name*" value="Morris" />
-            <Field label="Education Email (.edu)*" value="user@school.edu" keyboardType="email-address" />
-            <Field label="Password*" value="password123" secureTextEntry hint="Must be at least 8 characters." />
-            <Field label="Re-enter Password*" value="password123" secureTextEntry />
+            <Field label="Last Name*" value={lastName} onChangeText={setLastName} placeholder="Last name" />
+            <Field label="Education Email (.edu)*" value={email} onChangeText={setEmail} placeholder="user@school.edu" keyboardType="email-address" />
+            <Field label="Password*" value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry hint="Must be at least 8 characters." />
+            <Field label="Re-enter Password*" value={confirmPassword} onChangeText={setConfirmPassword} placeholder="Re-enter password" secureTextEntry />
             <CheckRow label="I read and agree to the privacy policy" defaultChecked />
             <CheckRow label="I read and agree to the community guidelines" defaultChecked />
           </View>
@@ -208,9 +249,9 @@ export default function SignupScreen() {
 
       {/* Next Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.btnNext} onPress={goNext}>
+        <TouchableOpacity style={[styles.btnNext, loading && { opacity: 0.6 }]} onPress={goNext} disabled={loading}>
           <Text style={styles.btnNextText}>
-            {step === TOTAL_STEPS ? 'Explore Teachers\' Lounge →' : 'Next →'}
+            {loading ? 'Please wait…' : step === TOTAL_STEPS ? "Explore Teachers' Lounge →" : 'Next →'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -218,13 +259,14 @@ export default function SignupScreen() {
   );
 }
 
-function Field({ label, value, placeholder, hint, secureTextEntry, keyboardType }: any) {
+function Field({ label, value, onChangeText, placeholder, hint, secureTextEntry, keyboardType }: any) {
   return (
     <View style={styles.field}>
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
         style={styles.input}
-        defaultValue={value}
+        value={value}
+        onChangeText={onChangeText}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType ?? 'default'}
