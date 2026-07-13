@@ -60,10 +60,11 @@ export default function SignupScreen() {
         Alert.alert('Missing fields', 'Please fill in all required fields.');
         return;
       }
-      if (!email.endsWith('.edu')) {
-        Alert.alert('Invalid email', 'Please use a .edu email address.');
-        return;
-      }
+      // TODO: re-enable .edu check before launch
+      // if (!email.endsWith('.edu')) {
+      //   Alert.alert('Invalid email', 'Please use a .edu email address.');
+      //   return;
+      // }
       if (password !== confirmPassword) {
         Alert.alert('Password mismatch', 'Passwords do not match.');
         return;
