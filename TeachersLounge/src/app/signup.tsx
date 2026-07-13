@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
+import { ALLOWED_EMAILS } from '@/config/allowedEmails';
 import { supabase } from '@/lib/supabase';
 
 const TOTAL_STEPS = 6;
@@ -60,11 +61,10 @@ export default function SignupScreen() {
         Alert.alert('Missing fields', 'Please fill in all required fields.');
         return;
       }
-      // TODO: re-enable .edu check before launch
-      // if (!email.endsWith('.edu')) {
-      //   Alert.alert('Invalid email', 'Please use a .edu email address.');
-      //   return;
-      // }
+      if (!email.endsWith('.edu') && !ALLOWED_EMAILS.includes(email)) {
+        Alert.alert('Invalid email', 'Please use a .edu email address.');
+        return;
+      }
       if (password !== confirmPassword) {
         Alert.alert('Password mismatch', 'Passwords do not match.');
         return;
