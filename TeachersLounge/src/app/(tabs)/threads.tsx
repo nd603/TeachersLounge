@@ -113,33 +113,6 @@ export default function ThreadsScreen() {
     </>
   );
 
-  // Post detail view
-  if (viewingPost) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header />
-        <ScrollView style={styles.feed}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => setViewingPost(null)}>
-            <Text style={styles.backText}>← Back</Text>
-          </TouchableOpacity>
-          <PostCard post={viewingPost} />
-          <View style={{ height: 100 }} />
-        </ScrollView>
-        <View style={styles.replyBar}>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📎</Text></TouchableOpacity>
-          <TextInput style={styles.replyInput} placeholder="Write your message" placeholderTextColor={TLColors.gray500} />
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📋</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📷</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>🎤</Text></TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
-          <Text style={styles.fabText}>+</Text>
-        </TouchableOpacity>
-        {createPostModal}
-      </SafeAreaView>
-    );
-  }
-
   const createPostModal = (
     <Modal visible={createVisible} animationType="slide" transparent>
       <Pressable style={styles.modalOverlay} onPress={() => setCreateVisible(false)} />
@@ -194,6 +167,33 @@ export default function ThreadsScreen() {
       </View>
     </Modal>
   );
+
+  // Post detail view
+  if (viewingPost) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <Header />
+        <ScrollView style={styles.feed}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => setViewingPost(null)}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <PostCard post={viewingPost} />
+          <View style={{ height: 100 }} />
+        </ScrollView>
+        <View style={styles.replyBar}>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📎</Text></TouchableOpacity>
+          <TextInput style={styles.replyInput} placeholder="Write your message" placeholderTextColor={TLColors.gray500} />
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📋</Text></TouchableOpacity>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📷</Text></TouchableOpacity>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>🎤</Text></TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+        {createPostModal}
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
