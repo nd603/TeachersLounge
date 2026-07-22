@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
@@ -9,17 +9,8 @@ export default function ProfileScreen() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.auth.signOut();
-          router.replace('/');
-        },
-      },
-    ]);
+    await supabase.auth.signOut();
+    router.replace('/');
   };
 
   return (
