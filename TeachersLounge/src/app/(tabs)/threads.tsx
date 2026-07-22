@@ -16,6 +16,40 @@ import { TLColors } from '@/constants/theme';
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
 const TOPICS = ['Mental Health', 'Class Management', 'Administration', 'Resources', 'Funny'];
 
+type Post = {
+  id: string;
+  text: string;
+  topic: string;
+  author: string;
+  anonymous: boolean;
+  date: string;
+};
+
+function formatNow() {
+  const now = new Date();
+  return `${now.getMonth() + 1}/${now.getDate()}/${String(now.getFullYear()).slice(-2)} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}${now.getHours() < 12 ? 'am' : 'pm'}`;
+}
+
+function PostCard({ post, onPress }: { post: Post; onPress?: () => void }) {
+  return (
+    <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
+      <View style={styles.postHeader}>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{post.author[0]}</Text></View>
+        <Text style={styles.postAuthor}>{post.author}</Text>
+        <View style={styles.topicBadge}><Text style={styles.topicBadgeText}>{post.topic}</Text></View>
+        <Text style={styles.postDate}>{post.date}</Text>
+      </View>
+      <Text style={styles.postText}>{post.text}</Text>
+      <View style={styles.postActions}>
+        <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text></TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function ThreadsScreen() {
   const [activeTab, setActiveTab] = useState('My Feed');
   const [createVisible, setCreateVisible] = useState(false);
@@ -23,18 +57,33 @@ export default function ThreadsScreen() {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [topicDropdownOpen, setTopicDropdownOpen] = useState(false);
   const [anonymous, setAnonymous] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [viewingPost, setViewingPost] = useState<Post | null>(null);
 
-  const resetCreate = () => {
+  const handlePost = () => {
+    const newPost: Post = {
+      id: Date.now().toString(),
+      text: postText.trim(),
+      topic: selectedTopic,
+      author: anonymous ? 'Anonymous' : 'Nithya D.',
+      anonymous,
+      date: formatNow(),
+    };
+    setPosts(prev => [newPost, ...prev]);
     setPostText('');
     setSelectedTopic('');
     setTopicDropdownOpen(false);
     setAnonymous(false);
     setCreateVisible(false);
+    setViewingPost(newPost);
   };
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
+  const filteredPosts = activeTab === 'My Feed'
+    ? posts
+    : posts.filter(p => p.topic === activeTab);
+
+  const Header = () => (
+    <>
       <View style={styles.header}>
         <View style={styles.headerLogo}>
           <Text style={styles.headerEmoji}>☕</Text>
@@ -45,70 +94,59 @@ export default function ThreadsScreen() {
           <TouchableOpacity><Text style={styles.icon}>💬</Text></TouchableOpacity>
         </View>
       </View>
-
-      {/* Search */}
       <View style={styles.searchRow}>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
           <Text style={styles.searchText}>Search for posts...</Text>
         </View>
-        <TouchableOpacity style={styles.filterBtn}>
-          <Text style={styles.filterIcon}>⚙️</Text>
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterBtn}><Text style={styles.filterIcon}>⚙️</Text></TouchableOpacity>
       </View>
-
-      {/* Feed Tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll} contentContainerStyle={styles.tabsContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => setActiveTab(tab)}>
+          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => { setActiveTab(tab); setViewingPost(null); }}>
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
             {activeTab === tab && <View style={styles.tabUnderline} />}
           </TouchableOpacity>
         ))}
       </ScrollView>
       <View style={styles.tabDivider} />
+    </>
+  );
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
-        {/* Weekly Community Prompt */}
-        <View style={styles.promptCard}>
-          <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
-          <View style={styles.promptMeta}>
-            <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
-            <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
-          </View>
-          <Text style={styles.promptQuestion}>
-            What is something you started integrating into your classroom this year that made your job easier?
-          </Text>
-          <View style={styles.postActions}>
-            <TouchableOpacity><Text style={styles.actionIcon}>···</Text></TouchableOpacity>
-            <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
-            <TouchableOpacity><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
-          </View>
+  // Post detail view
+  if (viewingPost) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <Header />
+        <ScrollView style={styles.feed}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => setViewingPost(null)}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <PostCard post={viewingPost} />
+          <View style={{ height: 100 }} />
+        </ScrollView>
+        <View style={styles.replyBar}>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📎</Text></TouchableOpacity>
+          <TextInput style={styles.replyInput} placeholder="Write your message" placeholderTextColor={TLColors.gray500} />
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📋</Text></TouchableOpacity>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>📷</Text></TouchableOpacity>
+          <TouchableOpacity><Text style={styles.replyBarIcon}>🎤</Text></TouchableOpacity>
         </View>
+        <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+        <CreatePostModal />
+      </SafeAreaView>
+    );
+  }
 
-        <View style={styles.divider} />
-
-        {/* No Posts Placeholder */}
-        <View style={styles.noPostsContainer}>
-          <Text style={styles.noPostsText}>No posts yet — be the first to share!</Text>
-        </View>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* Floating + Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-
-      {/* Create Post Modal */}
+  function CreatePostModal() {
+    return (
       <Modal visible={createVisible} animationType="slide" transparent>
-        <Pressable style={styles.modalOverlay} onPress={resetCreate} />
+        <Pressable style={styles.modalOverlay} onPress={() => setCreateVisible(false)} />
         <View style={styles.modalSheet}>
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>Create Post</Text>
-
-          {/* Topic Dropdown */}
           <View style={styles.dropdownWrapper}>
             <TouchableOpacity
               style={styles.dropdown}
@@ -131,8 +169,6 @@ export default function ThreadsScreen() {
               </View>
             )}
           </View>
-
-          {/* Text Input */}
           <TextInput
             style={styles.postInput}
             placeholder="Type here..."
@@ -141,8 +177,6 @@ export default function ThreadsScreen() {
             value={postText}
             onChangeText={setPostText}
           />
-
-          {/* Anonymous toggle */}
           <View style={styles.anonRow}>
             <Text style={styles.anonLabel}>Post anonymously as:</Text>
             <View style={styles.anonName}><Text style={styles.anonNameText}>HistoryTeacher1</Text></View>
@@ -152,16 +186,59 @@ export default function ThreadsScreen() {
               <View style={[styles.toggleThumb, anonymous && styles.toggleThumbOn]} />
             </TouchableOpacity>
           </View>
-
-          {/* Post Button */}
           <TouchableOpacity
             style={[styles.btnPost, !postText.trim() && styles.btnPostDisabled]}
             disabled={!postText.trim()}
-            onPress={resetCreate}>
+            onPress={handlePost}>
             <Text style={styles.btnPostText}>Post</Text>
           </TouchableOpacity>
         </View>
       </Modal>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <Header />
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
+        {/* Weekly Community Prompt */}
+        <View style={styles.promptCard}>
+          <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
+          <View style={styles.promptMeta}>
+            <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
+            <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
+          </View>
+          <Text style={styles.promptQuestion}>
+            What is something you started integrating into your classroom this year that made your job easier?
+          </Text>
+          <View style={styles.postActions}>
+            <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
+            <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
+            <TouchableOpacity><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.divider} />
+
+        {filteredPosts.length === 0 ? (
+          <View style={styles.noPostsContainer}>
+            <Text style={styles.noPostsText}>No posts yet — be the first to share!</Text>
+          </View>
+        ) : (
+          filteredPosts.map(post => (
+            <View key={post.id}>
+              <PostCard post={post} onPress={() => setViewingPost(post)} />
+              <View style={styles.divider} />
+            </View>
+          ))
+        )}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
+      <CreatePostModal />
     </SafeAreaView>
   );
 }
@@ -194,6 +271,8 @@ const styles = StyleSheet.create({
   tabUnderline: { height: 2, backgroundColor: TLColors.danger, width: '100%', marginTop: 4, borderRadius: 1 },
   tabDivider: { height: 1, backgroundColor: '#f0f0f0' },
   feed: { flex: 1 },
+  backBtn: { paddingHorizontal: 20, paddingVertical: 14 },
+  backText: { fontSize: 16, color: TLColors.black, fontWeight: '500' },
   promptCard: { padding: 20 },
   promptTitle: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 10 },
   promptMeta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
@@ -201,8 +280,22 @@ const styles = StyleSheet.create({
   promptTagText: { fontSize: 12, color: '#333' },
   promptDate: { fontSize: 12, color: '#888' },
   promptQuestion: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
+  postCard: { padding: 20 },
+  postHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' },
+  avatar: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  avatarText: { color: TLColors.white, fontWeight: '700', fontSize: 14 },
+  postAuthor: { fontSize: 14, fontWeight: '600', color: '#111' },
+  topicBadge: { backgroundColor: '#e8f4f5', borderRadius: 50, paddingHorizontal: 10, paddingVertical: 3 },
+  topicBadgeText: { fontSize: 12, color: TLColors.primary, fontWeight: '500' },
+  postDate: { fontSize: 12, color: '#888', marginLeft: 'auto' },
+  postText: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
   postActions: { flexDirection: 'row', gap: 16, alignItems: 'center' },
-  actionIcon: { fontSize: 18, color: '#888' },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  actionIcon: { fontSize: 16, color: '#888' },
+  actionLabel: { fontSize: 13, color: '#888' },
   divider: { height: 1, backgroundColor: '#f0f0f0' },
   noPostsContainer: { padding: 40, alignItems: 'center' },
   noPostsText: { fontSize: 14, color: TLColors.gray500, fontStyle: 'italic' },
@@ -214,6 +307,17 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
+  replyBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderTopWidth: 1, borderTopColor: '#f0f0f0',
+    backgroundColor: TLColors.white,
+  },
+  replyBarIcon: { fontSize: 20 },
+  replyInput: {
+    flex: 1, backgroundColor: '#f5f5f5', borderRadius: 20,
+    paddingHorizontal: 14, paddingVertical: 8, fontSize: 14,
+  },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: {
     backgroundColor: TLColors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20,
