@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
@@ -11,16 +11,18 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async () => {
+    setErrorMsg('');
     if (!email || !password) {
-      Alert.alert('Missing fields', 'Please enter your email and password.');
+      setErrorMsg('Please enter your email and password.');
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) { Alert.alert('Login failed', error.message); return; }
+    if (error) { setErrorMsg(error.message); return; }
     router.replace('/(tabs)/home');
   };
 
@@ -56,6 +58,7 @@ export default function LoginScreen() {
         </View>
       </View>
 
+      {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
       <TouchableOpacity style={[styles.btnFilled, loading && { opacity: 0.6 }]} onPress={handleLogin} disabled={loading}>
         <Text style={styles.btnFilledText}>{loading ? 'Logging in…' : 'Log In'}</Text>
       </TouchableOpacity>
@@ -80,4 +83,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: 'center',
   },
   btnFilledText: { color: TLColors.white, fontSize: 17, fontWeight: '600' },
+  error: { color: '#c0392b', fontSize: 14, marginBottom: 12 },
 });
