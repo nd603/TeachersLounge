@@ -135,67 +135,65 @@ export default function ThreadsScreen() {
         <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
-        <CreatePostModal />
+        {createPostModal}
       </SafeAreaView>
     );
   }
 
-  function CreatePostModal() {
-    return (
-      <Modal visible={createVisible} animationType="slide" transparent>
-        <Pressable style={styles.modalOverlay} onPress={() => setCreateVisible(false)} />
-        <View style={styles.modalSheet}>
-          <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>Create Post</Text>
-          <View style={styles.dropdownWrapper}>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => setTopicDropdownOpen(!topicDropdownOpen)}>
-              <Text style={[styles.dropdownText, !selectedTopic && { color: TLColors.gray500 }]}>
-                {selectedTopic || 'Add a topic tag'}
-              </Text>
-              <Text style={styles.dropdownArrow}>▾</Text>
-            </TouchableOpacity>
-            {topicDropdownOpen && (
-              <View style={styles.dropdownMenu}>
-                {TOPICS.map(t => (
-                  <TouchableOpacity
-                    key={t}
-                    style={[styles.dropdownItem, selectedTopic === t && styles.dropdownItemSelected]}
-                    onPress={() => { setSelectedTopic(t); setTopicDropdownOpen(false); }}>
-                    <Text style={[styles.dropdownItemText, selectedTopic === t && styles.dropdownItemTextSelected]}>{t}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-          <TextInput
-            style={styles.postInput}
-            placeholder="Type here..."
-            placeholderTextColor={TLColors.gray500}
-            multiline
-            value={postText}
-            onChangeText={setPostText}
-          />
-          <View style={styles.anonRow}>
-            <Text style={styles.anonLabel}>Post anonymously as:</Text>
-            <View style={styles.anonName}><Text style={styles.anonNameText}>HistoryTeacher1</Text></View>
-            <TouchableOpacity
-              style={[styles.toggle, anonymous && styles.toggleOn]}
-              onPress={() => setAnonymous(!anonymous)}>
-              <View style={[styles.toggleThumb, anonymous && styles.toggleThumbOn]} />
-            </TouchableOpacity>
-          </View>
+  const createPostModal = (
+    <Modal visible={createVisible} animationType="slide" transparent>
+      <Pressable style={styles.modalOverlay} onPress={() => setCreateVisible(false)} />
+      <View style={styles.modalSheet}>
+        <View style={styles.modalHandle} />
+        <Text style={styles.modalTitle}>Create Post</Text>
+        <View style={styles.dropdownWrapper}>
           <TouchableOpacity
-            style={[styles.btnPost, !postText.trim() && styles.btnPostDisabled]}
-            disabled={!postText.trim()}
-            onPress={handlePost}>
-            <Text style={styles.btnPostText}>Post</Text>
+            style={styles.dropdown}
+            onPress={() => setTopicDropdownOpen(!topicDropdownOpen)}>
+            <Text style={[styles.dropdownText, !selectedTopic && { color: TLColors.gray500 }]}>
+              {selectedTopic || 'Add a topic tag'}
+            </Text>
+            <Text style={styles.dropdownArrow}>▾</Text>
+          </TouchableOpacity>
+          {topicDropdownOpen && (
+            <View style={styles.dropdownMenu}>
+              {TOPICS.map(t => (
+                <TouchableOpacity
+                  key={t}
+                  style={[styles.dropdownItem, selectedTopic === t && styles.dropdownItemSelected]}
+                  onPress={() => { setSelectedTopic(t); setTopicDropdownOpen(false); }}>
+                  <Text style={[styles.dropdownItemText, selectedTopic === t && styles.dropdownItemTextSelected]}>{t}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+        <TextInput
+          style={styles.postInput}
+          placeholder="Type here..."
+          placeholderTextColor={TLColors.gray500}
+          multiline
+          value={postText}
+          onChangeText={setPostText}
+        />
+        <View style={styles.anonRow}>
+          <Text style={styles.anonLabel}>Post anonymously as:</Text>
+          <View style={styles.anonName}><Text style={styles.anonNameText}>HistoryTeacher1</Text></View>
+          <TouchableOpacity
+            style={[styles.toggle, anonymous && styles.toggleOn]}
+            onPress={() => setAnonymous(!anonymous)}>
+            <View style={[styles.toggleThumb, anonymous && styles.toggleThumbOn]} />
           </TouchableOpacity>
         </View>
-      </Modal>
-    );
-  }
+        <TouchableOpacity
+          style={[styles.btnPost, !postText.trim() && styles.btnPostDisabled]}
+          disabled={!postText.trim()}
+          onPress={handlePost}>
+          <Text style={styles.btnPostText}>Post</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -238,7 +236,7 @@ export default function ThreadsScreen() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      <CreatePostModal />
+      {createPostModal}
     </SafeAreaView>
   );
 }
