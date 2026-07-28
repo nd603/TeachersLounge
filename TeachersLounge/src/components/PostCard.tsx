@@ -3,14 +3,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TLColors } from '@/constants/theme';
 import { Post } from '@/services/posts';
 
-export function PostCard({ post, onPress }: { post: Post; onPress?: () => void }) {
+export function PostCard({ post, date, onPress }: { post: Post; date: string; onPress?: () => void }) {
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
       <View style={styles.postHeader}>
         <View style={styles.avatar}><Text style={styles.avatarText}>{post.author[0]}</Text></View>
         <Text style={styles.postAuthor}>{post.author}</Text>
         <View style={styles.topicBadge}><Text style={styles.topicBadgeText}>{post.topic}</Text></View>
-        <Text style={styles.postDate}>{post.date}</Text>
+        <Text style={styles.postDate}>{date}</Text>
       </View>
       <Text style={styles.postText}>{post.text}</Text>
       <View style={styles.postActions}>

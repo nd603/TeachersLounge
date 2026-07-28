@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -13,15 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
-import { type Post } from '@/services/posts';
+import { type Post, fetchPosts, createPost } from '@/services/posts';
+import { supabase } from '@/lib/supabase';
 
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
 const TOPICS = ['Mental Health', 'Class Management', 'Administration', 'Resources', 'Funny'];
-
-function formatNow() {
-  const now = new Date();
-  return `${now.getMonth() + 1}/${now.getDate()}/${String(now.getFullYear()).slice(-2)} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}${now.getHours() < 12 ? 'am' : 'pm'}`;
-}
 
 export default function ThreadsScreen() {
   const [activeTab, setActiveTab] = useState('My Feed');
@@ -32,29 +28,46 @@ export default function ThreadsScreen() {
   const [anonymous, setAnonymous] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handlePost = () => {
-    const newPost: Post = {
-      id: Date.now().toString(),
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    setLoading(true);
+    const { data } = await fetchPosts();
+    if (data) setPosts(data);
+    setLoading(false);
+  };
+
+  const handlePost = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data, error } = await createPost({
       text: postText.trim(),
       topic: selectedTopic,
-      author: anonymous ? 'Anonymous' : 'Nithya D.',
-      authorId: 'local',
+      author: anonymous ? 'Anonymous' : (user?.user_metadata?.first_name ?? 'Teacher'),
+      author_id: user?.id ?? '',
       anonymous,
-      date: formatNow(),
-    };
-    setPosts(prev => [newPost, ...prev]);
+    });
+    if (error || !data) return;
+    setPosts(prev => [data, ...prev]);
     setPostText('');
     setSelectedTopic('');
     setTopicDropdownOpen(false);
     setAnonymous(false);
     setCreateVisible(false);
-    setViewingPost(newPost);
+    setViewingPost(data);
   };
 
   const filteredPosts = activeTab === 'My Feed'
     ? posts
     : posts.filter(p => p.topic === activeTab);
+
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)} ${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}${d.getHours() < 12 ? 'am' : 'pm'}`;
+  };
 
   const Header = () => (
     <>
@@ -151,7 +164,7 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => setViewingPost(null)}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <PostCard post={viewingPost} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} />
           <View style={{ height: 100 }} />
         </ScrollView>
         <View style={styles.replyBar}>
@@ -191,18 +204,22 @@ export default function ThreadsScreen() {
         </View>
         <View style={styles.divider} />
 
-        {filteredPosts.length === 0 ? (
+        {loading ? (
+          <View style={styles.noPostsContainer}>
+            <Text style={styles.noPostsText}>Loading posts...</Text>
+          </View>
+        ) : filteredPosts.length === 0 ? (
           <View style={styles.noPostsContainer}>
             <Text style={styles.noPostsText}>No posts yet — be the first to share!</Text>
           </View>
-        ) : (
+        ) : filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
             <View key={post.id}>
-              <PostCard post={post} onPress={() => setViewingPost(post)} />
+              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => setViewingPost(post)} />
               <View style={styles.divider} />
             </View>
           ))
-        )}
+        ) : null}
         <View style={{ height: 100 }} />
       </ScrollView>
 
