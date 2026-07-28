@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
-import { supabase } from '@/lib/supabase';
+import { signIn } from '@/services/auth';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await signIn(email, password);
     setLoading(false);
     if (error) { setErrorMsg(error.message); return; }
     router.replace('/(tabs)/home');

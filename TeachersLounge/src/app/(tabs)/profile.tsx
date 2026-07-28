@@ -3,13 +3,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
-import { supabase } from '@/lib/supabase';
+import { signOut } from '@/services/auth';
 
 export default function ProfileScreen() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.replace('/');
   };
 

@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
 import { ALLOWED_EMAILS } from '@/config/allowedEmails';
-import { supabase } from '@/lib/supabase';
+import { signUp } from '@/services/auth';
 
 const TOTAL_STEPS = 6;
 
@@ -75,11 +75,7 @@ export default function SignupScreen() {
       }
       setLoading(true);
       try {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { first_name: firstName, last_name: lastName } },
-        });
+        const { error } = await signUp(email, password, firstName, lastName);
         if (error) { Alert.alert('Sign up error', error.message); setLoading(false); return; }
       } catch (e: any) {
         Alert.alert('Sign up error', e?.message ?? 'Something went wrong. Check your connection.');
