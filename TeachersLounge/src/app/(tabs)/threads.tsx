@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
+import { ReplyCard, type Reply } from '@/components/ReplyCard';
 import { type Post, fetchPosts, createPost } from '@/services/posts';
 import { supabase } from '@/lib/supabase';
 
@@ -29,6 +30,8 @@ export default function ThreadsScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [replies, setReplies] = useState<Record<string, Reply[]>>({});
+  const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     loadPosts();
@@ -58,6 +61,24 @@ export default function ThreadsScreen() {
     setAnonymous(false);
     setCreateVisible(false);
     setViewingPost(data);
+  };
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !viewingPost) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const newReply: Reply = {
+      id: Date.now().toString(),
+      post_id: viewingPost.id,
+      text: replyText.trim(),
+      author: user?.user_metadata?.first_name ?? 'Teacher',
+      author_id: user?.id ?? '',
+      created_at: new Date().toISOString(),
+    };
+    setReplies(prev => ({
+      ...prev,
+      [viewingPost.id]: [prev[viewingPost.id] ?? [], newReply].flat(),
+    }));
+    setReplyText('');
   };
 
   const filteredPosts = activeTab === 'My Feed'
@@ -157,22 +178,37 @@ export default function ThreadsScreen() {
 
   // Post detail view
   if (viewingPost) {
+    const postReplies = replies[viewingPost.id] ?? [];
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header />
         <ScrollView style={styles.feed}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => setViewingPost(null)}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); }}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} />
+          <View style={styles.divider} />
+          {postReplies.map(reply => (
+            <ReplyCard key={reply.id} reply={reply} date={formatDate(reply.created_at)} />
+          ))}
           <View style={{ height: 100 }} />
         </ScrollView>
         <View style={styles.replyBar}>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📎</Text></TouchableOpacity>
-          <TextInput style={styles.replyInput} placeholder="Write your message" placeholderTextColor={TLColors.gray500} />
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📋</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>📷</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.replyBarIcon}>🎤</Text></TouchableOpacity>
+          <TextInput
+            style={styles.replyInput}
+            placeholder="Write your message"
+            placeholderTextColor={TLColors.gray500}
+            value={replyText}
+            onChangeText={setReplyText}
+            onSubmitEditing={handleReply}
+            returnKeyType="send"
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, !replyText.trim() && { opacity: 0.4 }]}
+            onPress={handleReply}
+            disabled={!replyText.trim()}>
+            <Text style={styles.sendBtnText}>↑</Text>
+          </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
           <Text style={styles.fabText}>+</Text>
@@ -286,11 +322,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#f0f0f0',
     backgroundColor: TLColors.white,
   },
-  replyBarIcon: { fontSize: 20 },
   replyInput: {
     flex: 1, backgroundColor: '#f5f5f5', borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 8, fontSize: 14,
   },
+  sendBtn: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  sendBtnText: { color: TLColors.white, fontSize: 16, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: {
     backgroundColor: TLColors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20,
