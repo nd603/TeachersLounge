@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -20,6 +20,84 @@ import { supabase } from '@/lib/supabase';
 
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
 const TOPICS = ['Mental Health', 'Class Management', 'Administration', 'Resources', 'Funny'];
+
+// Thread line starts below parent avatar:  paddingTop + full avatar
+const THREAD_LINE_TOP = 12 + REPLY_AVATAR_SIZE;
+// Avatar center within a nested card: paddingTop + half avatar
+const NESTED_AVATAR_CENTER_OFFSET = 12 + REPLY_AVATAR_SIZE / 2;
+
+function ReplyThreadGroup({
+  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles,
+}: {
+  reply: Reply;
+  children: Reply[];
+  index: number;
+  formatDate: (s: string) => string;
+  openReplyBox: (type: 'post' | 'reply', id: string) => void;
+  renderInlineReplyBox: (type: 'post' | 'reply', id: string) => React.ReactNode;
+  styles: Record<string, any>;
+}) {
+  const groupRef = useRef<View>(null);
+  const lastChildRef = useRef<View>(null);
+  const [lineHeight, setLineHeight] = useState(0);
+
+  const measure = useCallback(() => {
+    if (!groupRef.current || !lastChildRef.current || children.length === 0) return;
+    lastChildRef.current.measureLayout(
+      groupRef.current as any,
+      (_x: number, y: number) => {
+        const avatarCenterY = y + NESTED_AVATAR_CENTER_OFFSET;
+        setLineHeight(Math.max(0, avatarCenterY - THREAD_LINE_TOP));
+      },
+      () => {}
+    );
+  }, [children.length]);
+
+  return (
+    <View ref={groupRef} style={index > 0 ? styles.replyGroupSpacer : undefined}>
+      {/* Thread line: absolutely positioned, precise height */}
+      {children.length > 0 && lineHeight > 0 && (
+        <View style={[styles.threadLineAbsolute, {
+          top: THREAD_LINE_TOP,
+          left: REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2 - 1,
+          height: lineHeight,
+        }]} />
+      )}
+      <ReplyCard
+        reply={reply}
+        date={formatDate(reply.created_at)}
+        onReply={() => openReplyBox('reply', reply.id)}
+        showThreadLine={false}
+      />
+      {renderInlineReplyBox('reply', reply.id)}
+      {children.length > 0 && (
+        <View style={{ marginLeft: REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2 - 1 }}>
+          {children.map((child, ci) => {
+            const isLast = ci === children.length - 1;
+            return (
+              <View
+                key={child.id}
+                ref={isLast ? lastChildRef : undefined}
+                onLayout={isLast ? measure : undefined}
+              >
+                <View style={styles.nestedReply}>
+                  <View style={styles.branchConnector} />
+                  <ReplyCard
+                    reply={child}
+                    date={formatDate(child.created_at)}
+                    onReply={() => openReplyBox('reply', child.id)}
+                    nested
+                  />
+                </View>
+                {renderInlineReplyBox('reply', child.id)}
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function ThreadsScreen() {
   const [activeTab, setActiveTab] = useState('My Feed');
@@ -245,39 +323,19 @@ export default function ThreadsScreen() {
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
-          {postReplies.filter(r => !r.parent_reply_id).map((reply, index, arr) => {
+          {postReplies.filter(r => !r.parent_reply_id).map((reply, index) => {
             const children = postReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
-            // Left edge of the 2px thread line = avatar center - 1
-            const lineX = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2 - 1;
             return (
-              <View key={reply.id} style={index > 0 ? styles.replyGroupSpacer : undefined}>
-                <ReplyCard
-                  reply={reply}
-                  date={formatDate(reply.created_at)}
-                  onReply={() => openReplyBox('reply', reply.id)}
-                  showThreadLine={children.length > 0}
-                />
-                {renderInlineReplyBox('reply', reply.id)}
-                {children.length > 0 && (
-                  <View style={[styles.childrenContainer, { marginLeft: lineX }]}>
-                    {children.map((child, ci) => (
-                      <View key={child.id}>
-                        <View style={styles.nestedReply}>
-                          <View style={styles.branchConnector} />
-                          <ReplyCard
-                            reply={child}
-                            date={formatDate(child.created_at)}
-                            onReply={() => openReplyBox('reply', child.id)}
-                            nested
-                            lastNested={ci === children.length - 1}
-                          />
-                        </View>
-                        {renderInlineReplyBox('reply', child.id)}
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
+              <ReplyThreadGroup
+                key={reply.id}
+                reply={reply}
+                children={children}
+                index={index}
+                formatDate={formatDate}
+                openReplyBox={openReplyBox}
+                renderInlineReplyBox={renderInlineReplyBox}
+                styles={styles}
+              />
             );
           })}
           <View style={{ height: 100 }} />
@@ -389,9 +447,11 @@ const styles = StyleSheet.create({
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
   replyGroupSpacer: { borderTopWidth: 1, borderTopColor: '#f0f0f0' },
-  childrenContainer: {
-    borderLeftWidth: 2,
-    borderColor: '#ddd',
+  threadLineAbsolute: {
+    position: 'absolute',
+    width: 2,
+    backgroundColor: '#ddd',
+    borderRadius: 1,
   },
   nestedReply: { flexDirection: 'row', alignItems: 'flex-start' },
   branchConnector: {
