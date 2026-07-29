@@ -68,8 +68,8 @@ export default function ProfileScreen() {
 
   const loadPosts = async () => {
     setPostsLoading(true);
-    const all = await fetchPosts();
-    setPosts(all.filter(p => p.author_id === userId));
+    const { data } = await fetchPosts();
+    setPosts((data ?? []).filter(p => p.author_id === userId));
     setPostsLoading(false);
   };
 
