@@ -20,15 +20,17 @@ export function ReplyCard({
   onReply,
   showThreadLine,
   nested,
+  lastNested,
 }: {
   reply: Reply;
   date: string;
   onReply?: () => void;
   showThreadLine?: boolean;
   nested?: boolean;
+  lastNested?: boolean;
 }) {
   return (
-    <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested]}>
+    <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested, lastNested && styles.cardNoBottomPad]}>
       <View style={styles.leftCol}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{reply.author[0]}</Text>

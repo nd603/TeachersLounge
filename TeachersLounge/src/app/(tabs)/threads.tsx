@@ -260,7 +260,7 @@ export default function ThreadsScreen() {
                 {renderInlineReplyBox('reply', reply.id)}
                 {children.length > 0 && (
                   <View style={[styles.childrenContainer, { marginLeft: lineX }]}>
-                    {children.map(child => (
+                    {children.map((child, ci) => (
                       <View key={child.id}>
                         <View style={styles.nestedReply}>
                           <View style={styles.branchConnector} />
@@ -269,6 +269,7 @@ export default function ThreadsScreen() {
                             date={formatDate(child.created_at)}
                             onReply={() => openReplyBox('reply', child.id)}
                             nested
+                            lastNested={ci === children.length - 1}
                           />
                         </View>
                         {renderInlineReplyBox('reply', child.id)}
