@@ -34,7 +34,9 @@ export default function ThreadsScreen() {
   const [replies, setReplies] = useState<Record<string, Reply[]>>({});
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [replyError, setReplyError] = useState('');
   const replyInputRef = useRef<TextInput>(null);
+  const replyTextRef = useRef('');
 
   useEffect(() => {
     loadPosts();
@@ -67,21 +69,28 @@ export default function ThreadsScreen() {
   };
 
   const handleReply = async () => {
-    if (!replyText.trim() || !viewingPost || !replyingToId) return;
+    const text = replyTextRef.current.trim();
+    if (!text || !viewingPost || !replyingToId) return;
+    setReplyError('');
     const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await createReply({
       post_id: viewingPost.id,
-      text: replyText.trim(),
+      text,
       author: user?.user_metadata?.first_name ?? 'Teacher',
       author_id: user?.id ?? '',
     });
-    if (error || !data) return;
+    if (error || !data) {
+      setReplyError(error?.message ?? 'Failed to post reply. Please try again.');
+      return;
+    }
     setReplies(prev => ({
       ...prev,
       [viewingPost.id]: [...(prev[viewingPost.id] ?? []), data],
     }));
     setReplyText('');
+    replyTextRef.current = '';
     setReplyingToId(null);
+    setReplyError('');
   };
 
   const openPost = async (post: Post) => {
@@ -93,6 +102,8 @@ export default function ThreadsScreen() {
   const openReplyBox = (id: string) => {
     setReplyingToId(id);
     setReplyText('');
+    replyTextRef.current = '';
+    setReplyError('');
     setTimeout(() => replyInputRef.current?.focus(), 100);
   };
 
@@ -200,18 +211,18 @@ export default function ThreadsScreen() {
           placeholder="Write a reply..."
           placeholderTextColor={TLColors.gray500}
           value={replyText}
-          onChangeText={setReplyText}
+          onChangeText={v => { setReplyText(v); replyTextRef.current = v; }}
           multiline
           autoFocus
         />
+        {replyError ? <Text style={styles.replyErrorText}>{replyError}</Text> : null}
         <View style={styles.inlineReplyActions}>
-          <TouchableOpacity onPress={() => { setReplyingToId(null); setReplyText(''); }}>
+          <TouchableOpacity onPress={() => { setReplyingToId(null); setReplyText(''); replyTextRef.current = ''; setReplyError(''); }}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.sendBtn, !replyText.trim() && { opacity: 0.4 }]}
-            onPress={handleReply}
-            disabled={!replyText.trim()}>
+            onPressIn={handleReply}>
             <Text style={styles.sendBtnText}>Reply</Text>
           </TouchableOpacity>
         </View>
@@ -357,6 +368,7 @@ const styles = StyleSheet.create({
   inlineReplyActions: {
     flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 8, alignItems: 'center',
   },
+  replyErrorText: { fontSize: 12, color: TLColors.danger, marginTop: 4 },
   cancelText: { fontSize: 14, color: TLColors.gray500 },
   sendBtn: {
     backgroundColor: TLColors.primary, borderRadius: 20,
