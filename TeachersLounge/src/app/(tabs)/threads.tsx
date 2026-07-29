@@ -99,8 +99,8 @@ export default function ThreadsScreen() {
     if (data) setReplies(prev => ({ ...prev, [post.id]: data }));
   };
 
-  const openReplyBox = (id: string) => {
-    setReplyingToId(id);
+  const openReplyBox = (type: 'post' | 'reply', id: string) => {
+    setReplyingToId(`${type}:${id}`);
     setReplyText('');
     replyTextRef.current = '';
     setReplyError('');
@@ -202,8 +202,8 @@ export default function ThreadsScreen() {
     </Modal>
   );
 
-  const renderInlineReplyBox = (parentId: string) =>
-    replyingToId === parentId ? (
+  const renderInlineReplyBox = (type: 'post' | 'reply', id: string) =>
+    replyingToId === `${type}:${id}` ? (
       <View style={styles.inlineReplyBox}>
         <TextInput
           ref={replyInputRef}
@@ -217,7 +217,7 @@ export default function ThreadsScreen() {
         />
         {replyError ? <Text style={styles.replyErrorText}>{replyError}</Text> : null}
         <View style={styles.inlineReplyActions}>
-          <TouchableOpacity onPress={() => { setReplyingToId(null); setReplyText(''); replyTextRef.current = ''; setReplyError(''); }}>
+          <TouchableOpacity onPress={() => { setReplyingToId(null); setReplyText(''); replyTextRef.current = ''; setReplyError(''); }} >
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -239,13 +239,13 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox(viewingPost.id)} />
-          {renderInlineReplyBox(viewingPost.id)}
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
+          {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
           {postReplies.map(reply => (
             <View key={reply.id}>
-              <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox(reply.id)} />
-              {renderInlineReplyBox(reply.id)}
+              <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox('reply', reply.id)} />
+              {renderInlineReplyBox('reply', reply.id)}
             </View>
           ))}
           <View style={{ height: 100 }} />
