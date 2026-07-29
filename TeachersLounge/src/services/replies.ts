@@ -14,6 +14,7 @@ export async function createReply(reply: {
   text: string;
   author: string;
   author_id: string;
+  parent_reply_id?: string | null;
 }) {
   const { data, error } = await supabase.from('replies').insert(reply).select().single();
   return { data, error };

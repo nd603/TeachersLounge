@@ -72,12 +72,15 @@ export default function ThreadsScreen() {
     const text = replyTextRef.current.trim();
     if (!text || !viewingPost || !replyingToId) return;
     setReplyError('');
+    const [type, id] = replyingToId.split(':');
+    const parentReplyId = type === 'reply' ? id : null;
     const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await createReply({
       post_id: viewingPost.id,
       text,
       author: user?.user_metadata?.first_name ?? 'Teacher',
       author_id: user?.id ?? '',
+      parent_reply_id: parentReplyId,
     });
     if (error || !data) {
       setReplyError(error?.message ?? 'Failed to post reply. Please try again.');
@@ -242,10 +245,19 @@ export default function ThreadsScreen() {
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
-          {postReplies.map(reply => (
+          {postReplies.filter(r => !r.parent_reply_id).map(reply => (
             <View key={reply.id}>
               <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox('reply', reply.id)} />
               {renderInlineReplyBox('reply', reply.id)}
+              {postReplies.filter(r => r.parent_reply_id === reply.id).map(child => (
+                <View key={child.id} style={styles.nestedReply}>
+                  <View style={styles.nestedLine} />
+                  <View style={styles.nestedContent}>
+                    <ReplyCard reply={child} date={formatDate(child.created_at)} onReply={() => openReplyBox('reply', child.id)} />
+                    {renderInlineReplyBox('reply', child.id)}
+                  </View>
+                </View>
+              ))}
             </View>
           ))}
           <View style={{ height: 100 }} />
@@ -356,6 +368,9 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
+  nestedReply: { flexDirection: 'row', paddingLeft: 20 },
+  nestedLine: { width: 2, backgroundColor: '#e0e0e0', marginRight: 8, borderRadius: 1 },
+  nestedContent: { flex: 1 },
   inlineReplyBox: {
     marginHorizontal: 20, marginBottom: 12,
     borderWidth: 1, borderColor: TLColors.gray300, borderRadius: 10,

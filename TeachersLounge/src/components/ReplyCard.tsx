@@ -4,6 +4,7 @@ import { TLColors } from '@/constants/theme';
 export type Reply = {
   id: string;
   post_id: string;
+  parent_reply_id: string | null;
   text: string;
   author: string;
   author_id: string;
