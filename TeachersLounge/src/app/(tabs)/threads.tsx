@@ -249,7 +249,7 @@ export default function ThreadsScreen() {
             <View key={reply.id}>
               <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox('reply', reply.id)} />
               {renderInlineReplyBox('reply', reply.id)}
-              {postReplies.filter(r => r.parent_reply_id === reply.id).map(child => (
+              {postReplies.filter(r => String(r.parent_reply_id) === String(reply.id)).map(child => (
                 <View key={child.id} style={styles.nestedReply}>
                   <View style={styles.nestedLine} />
                   <View style={styles.nestedContent}>
