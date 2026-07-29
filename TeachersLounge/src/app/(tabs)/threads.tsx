@@ -245,21 +245,29 @@ export default function ThreadsScreen() {
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
-          {postReplies.filter(r => !r.parent_reply_id).map(reply => (
-            <View key={reply.id}>
-              <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox('reply', reply.id)} />
-              {renderInlineReplyBox('reply', reply.id)}
-              {postReplies.filter(r => String(r.parent_reply_id) === String(reply.id)).map(child => (
-                <View key={child.id} style={styles.nestedReply}>
-                  <View style={styles.nestedLine} />
-                  <View style={styles.nestedContent}>
-                    <ReplyCard reply={child} date={formatDate(child.created_at)} onReply={() => openReplyBox('reply', child.id)} />
-                    {renderInlineReplyBox('reply', child.id)}
+          {postReplies.filter(r => !r.parent_reply_id).map(reply => {
+            const children = postReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
+            return (
+              <View key={reply.id}>
+                <ReplyCard
+                  reply={reply}
+                  date={formatDate(reply.created_at)}
+                  onReply={() => openReplyBox('reply', reply.id)}
+                  showThreadLine={children.length > 0}
+                />
+                {renderInlineReplyBox('reply', reply.id)}
+                {children.map(child => (
+                  <View key={child.id} style={styles.nestedReply}>
+                    <View style={styles.connector} />
+                    <View style={styles.nestedContent}>
+                      <ReplyCard reply={child} date={formatDate(child.created_at)} onReply={() => openReplyBox('reply', child.id)} />
+                      {renderInlineReplyBox('reply', child.id)}
+                    </View>
                   </View>
-                </View>
-              ))}
-            </View>
-          ))}
+                ))}
+              </View>
+            );
+          })}
           <View style={{ height: 100 }} />
         </ScrollView>
         <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
@@ -369,7 +377,18 @@ const styles = StyleSheet.create({
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
   nestedReply: { flexDirection: 'row', paddingLeft: 20 },
-  nestedLine: { width: 2, backgroundColor: '#e0e0e0', marginRight: 8, borderRadius: 1 },
+  connector: {
+    width: 28,
+    height: 28,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#ddd',
+    borderBottomLeftRadius: 10,
+    marginTop: -10,
+    marginLeft: 15,
+    marginRight: 1,
+    flexShrink: 0,
+  },
   nestedContent: { flex: 1 },
   inlineReplyBox: {
     marginHorizontal: 20, marginBottom: 12,
