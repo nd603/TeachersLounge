@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   Modal,
   Pressable,
@@ -106,6 +107,7 @@ function ReplyThreadGroup({
 }
 
 export default function ThreadsScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('My Feed');
   const [createVisible, setCreateVisible] = useState(false);
   const [postText, setPostText] = useState('');
@@ -232,7 +234,7 @@ export default function ThreadsScreen() {
         </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity><Text style={styles.icon}>🔔</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.icon}>💬</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/messages')}><Text style={styles.icon}>💬</Text></TouchableOpacity>
         </View>
       </View>
       <View style={styles.searchRow}>
