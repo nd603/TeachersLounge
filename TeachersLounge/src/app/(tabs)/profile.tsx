@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TLColors } from '@/constants/theme';
-import { supabase } from '@/services/supabase';
+import { supabase } from '@/lib/supabase';
 import { signOut } from '@/services/auth';
 import { fetchPosts } from '@/services/posts';
 import type { Post } from '@/services/posts';
@@ -124,7 +124,7 @@ export default function ProfileScreen() {
             <Text style={styles.statCount}>14</Text>
             <Text style={styles.statLabel}>My Lounge</Text>
           </View>
-          <TouchableOpacity style={styles.settingsBtn} onPress={handleSignOut}>
+          <TouchableOpacity style={styles.settingsBtn}>
             <Text style={styles.settingsIcon}>⚙️</Text>
           </TouchableOpacity>
         </View>
@@ -220,6 +220,13 @@ export default function ProfileScreen() {
         renderItem={renderPost}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
+        ListFooterComponent={
+          <View style={styles.signOutSection}>
+            <TouchableOpacity style={styles.btnSignOut} onPress={handleSignOut}>
+              <Text style={styles.btnSignOutText}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
+        }
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -306,4 +313,11 @@ const styles = StyleSheet.create({
   postText: { fontSize: 14, color: '#333', lineHeight: 20 },
 
   emptyText: { textAlign: 'center', color: TLColors.gray500, fontSize: 14, marginTop: 40, fontStyle: 'italic' },
+
+  signOutSection: { paddingHorizontal: 20, paddingVertical: 24, alignItems: 'center' },
+  btnSignOut: {
+    borderWidth: 1.5, borderColor: TLColors.danger, borderRadius: 50,
+    paddingVertical: 12, paddingHorizontal: 40,
+  },
+  btnSignOutText: { color: TLColors.danger, fontSize: 15, fontWeight: '600' },
 });
