@@ -191,7 +191,7 @@ export default function ThreadsScreen() {
     </Modal>
   );
 
-  const InlineReplyBox = ({ parentId }: { parentId: string }) => (
+  const renderInlineReplyBox = (parentId: string) =>
     replyingToId === parentId ? (
       <View style={styles.inlineReplyBox}>
         <TextInput
@@ -216,8 +216,7 @@ export default function ThreadsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    ) : null
-  );
+    ) : null;
 
   // Post detail view
   if (viewingPost) {
@@ -230,12 +229,12 @@ export default function ThreadsScreen() {
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox(viewingPost.id)} />
-          <InlineReplyBox parentId={viewingPost.id} />
+          {renderInlineReplyBox(viewingPost.id)}
           <View style={styles.divider} />
           {postReplies.map(reply => (
             <View key={reply.id}>
               <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox(reply.id)} />
-              <InlineReplyBox parentId={reply.id} />
+              {renderInlineReplyBox(reply.id)}
             </View>
           ))}
           <View style={{ height: 100 }} />
@@ -353,6 +352,7 @@ const styles = StyleSheet.create({
   },
   inlineReplyInput: {
     fontSize: 14, color: '#222', minHeight: 60, textAlignVertical: 'top',
+    textAlign: 'left', writingDirection: 'ltr',
   },
   inlineReplyActions: {
     flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 8, alignItems: 'center',
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   postInput: {
     borderWidth: 1, borderColor: TLColors.gray300, borderRadius: 8,
     padding: 14, fontSize: 15, minHeight: 160, textAlignVertical: 'top',
-    marginBottom: 16,
+    marginBottom: 16, textAlign: 'left', writingDirection: 'ltr',
   },
   anonRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
   anonLabel: { fontSize: 13, color: TLColors.gray700 },
