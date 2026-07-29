@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -38,6 +40,7 @@ export default function ProfileScreen() {
   const [editingBio, setEditingBio] = useState(false);
   const [draftBio, setDraftBio] = useState('');
   const [savingBio, setSavingBio] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('Posts');
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
@@ -124,7 +127,7 @@ export default function ProfileScreen() {
             <Text style={styles.statCount}>14</Text>
             <Text style={styles.statLabel}>My Lounge</Text>
           </View>
-          <TouchableOpacity style={styles.settingsBtn}>
+          <TouchableOpacity style={styles.settingsBtn} onPress={() => setSettingsVisible(true)}>
             <Text style={styles.settingsIcon}>⚙️</Text>
           </TouchableOpacity>
         </View>
@@ -214,19 +217,26 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Settings sheet */}
+      <Modal visible={settingsVisible} transparent animationType="slide" onRequestClose={() => setSettingsVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setSettingsVisible(false)}>
+          <Pressable style={styles.settingsSheet} onPress={() => {}}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Settings</Text>
+            <TouchableOpacity style={styles.sheetRow} onPress={handleSignOut}>
+              <Text style={styles.sheetRowIcon}>🚪</Text>
+              <Text style={styles.sheetRowTextDanger}>Sign Out</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <FlatList
         data={activeTab === 'Posts' ? posts : []}
         keyExtractor={p => p.id}
         renderItem={renderPost}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
-        ListFooterComponent={
-          <View style={styles.signOutSection}>
-            <TouchableOpacity style={styles.btnSignOut} onPress={handleSignOut}>
-              <Text style={styles.btnSignOutText}>Sign Out</Text>
-            </TouchableOpacity>
-          </View>
-        }
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -314,10 +324,14 @@ const styles = StyleSheet.create({
 
   emptyText: { textAlign: 'center', color: TLColors.gray500, fontSize: 14, marginTop: 40, fontStyle: 'italic' },
 
-  signOutSection: { paddingHorizontal: 20, paddingVertical: 24, alignItems: 'center' },
-  btnSignOut: {
-    borderWidth: 1.5, borderColor: TLColors.danger, borderRadius: 50,
-    paddingVertical: 12, paddingHorizontal: 40,
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  settingsSheet: {
+    backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    paddingBottom: 40, paddingTop: 12, paddingHorizontal: 20,
   },
-  btnSignOutText: { color: TLColors.danger, fontSize: 15, fontWeight: '600' },
+  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#ddd', alignSelf: 'center', marginBottom: 16 },
+  sheetTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 16 },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
+  sheetRowIcon: { fontSize: 20 },
+  sheetRowTextDanger: { fontSize: 15, color: TLColors.danger, fontWeight: '500' },
 });
