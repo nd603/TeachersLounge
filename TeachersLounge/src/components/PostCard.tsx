@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TLColors } from '@/constants/theme';
 import { Post } from '@/services/posts';
 
-export function PostCard({ post, date, onPress }: { post: Post; date: string; onPress?: () => void }) {
+export function PostCard({ post, date, onPress, onReply }: { post: Post; date: string; onPress?: () => void; onReply?: () => void }) {
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
       <View style={styles.postHeader}>
@@ -17,7 +17,9 @@ export function PostCard({ post, date, onPress }: { post: Post; date: string; on
         <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn} onPress={onReply}>
+          <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );

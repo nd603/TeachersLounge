@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -32,6 +32,7 @@ export default function ThreadsScreen() {
   const [loading, setLoading] = useState(true);
   const [replies, setReplies] = useState<Record<string, Reply[]>>({});
   const [replyText, setReplyText] = useState('');
+  const replyInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     loadPosts();
@@ -186,7 +187,7 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); }}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => replyInputRef.current?.focus()} />
           <View style={styles.divider} />
           {postReplies.map(reply => (
             <ReplyCard key={reply.id} reply={reply} date={formatDate(reply.created_at)} />
@@ -195,6 +196,7 @@ export default function ThreadsScreen() {
         </ScrollView>
         <View style={styles.replyBar}>
           <TextInput
+            ref={replyInputRef}
             style={styles.replyInput}
             placeholder="Write your message"
             placeholderTextColor={TLColors.gray500}
