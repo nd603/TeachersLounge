@@ -245,12 +245,12 @@ export default function ThreadsScreen() {
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
-          {postReplies.filter(r => !r.parent_reply_id).map(reply => {
+          {postReplies.filter(r => !r.parent_reply_id).map((reply, index, arr) => {
             const children = postReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
             // Left edge of the 2px thread line = avatar center - 1
             const lineX = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2 - 1;
             return (
-              <View key={reply.id}>
+              <View key={reply.id} style={index > 0 ? styles.replyGroupSpacer : undefined}>
                 <ReplyCard
                   reply={reply}
                   date={formatDate(reply.created_at)}
@@ -387,6 +387,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
+  replyGroupSpacer: { borderTopWidth: 1, borderTopColor: '#f0f0f0' },
   childrenContainer: {
     borderLeftWidth: 2,
     borderColor: '#ddd',
