@@ -11,19 +11,24 @@ export type Reply = {
   created_at: string;
 };
 
+export const REPLY_LEFT_PAD = 20;
+export const REPLY_AVATAR_SIZE = 32;
+
 export function ReplyCard({
   reply,
   date,
   onReply,
   showThreadLine,
+  nested,
 }: {
   reply: Reply;
   date: string;
   onReply?: () => void;
   showThreadLine?: boolean;
+  nested?: boolean;
 }) {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, nested && styles.cardNested]}>
       <View style={styles.leftCol}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{reply.author[0]}</Text>
@@ -47,16 +52,22 @@ export function ReplyCard({
   );
 }
 
-const AVATAR_SIZE = 32;
-const LEFT_PAD = 20;
-const COL_WIDTH = AVATAR_SIZE + 12; // avatar + gap
-
 const styles = StyleSheet.create({
-  card: { flexDirection: 'row', paddingLeft: LEFT_PAD, paddingRight: 20, paddingVertical: 12 },
-  leftCol: { width: COL_WIDTH, alignItems: 'center' },
+  card: {
+    flexDirection: 'row',
+    paddingLeft: REPLY_LEFT_PAD,
+    paddingRight: 20,
+    paddingVertical: 12,
+  },
+  cardNested: { paddingLeft: 0 },
+  leftCol: { width: REPLY_AVATAR_SIZE, alignItems: 'center', marginRight: 10 },
   avatar: {
-    width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: TLColors.gray300, alignItems: 'center', justifyContent: 'center',
+    width: REPLY_AVATAR_SIZE,
+    height: REPLY_AVATAR_SIZE,
+    borderRadius: REPLY_AVATAR_SIZE / 2,
+    backgroundColor: TLColors.gray300,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarText: { color: TLColors.white, fontWeight: '700', fontSize: 13 },
   threadLine: { flex: 1, width: 2, backgroundColor: '#ddd', marginTop: 6, borderRadius: 1 },

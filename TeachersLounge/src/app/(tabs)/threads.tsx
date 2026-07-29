@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
-import { ReplyCard, type Reply } from '@/components/ReplyCard';
+import { ReplyCard, type Reply, REPLY_LEFT_PAD, REPLY_AVATAR_SIZE } from '@/components/ReplyCard';
 import { type Post, fetchPosts, createPost } from '@/services/posts';
 import { fetchReplies, createReply } from '@/services/replies';
 import { supabase } from '@/lib/supabase';
@@ -247,6 +247,8 @@ export default function ThreadsScreen() {
           <View style={styles.divider} />
           {postReplies.filter(r => !r.parent_reply_id).map(reply => {
             const children = postReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
+            // Avatar center x relative to screen left = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE/2
+            const lineX = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2;
             return (
               <View key={reply.id}>
                 <ReplyCard
@@ -256,15 +258,24 @@ export default function ThreadsScreen() {
                   showThreadLine={children.length > 0}
                 />
                 {renderInlineReplyBox('reply', reply.id)}
-                {children.map(child => (
-                  <View key={child.id} style={styles.nestedReply}>
-                    <View style={styles.connector} />
-                    <View style={styles.nestedContent}>
-                      <ReplyCard reply={child} date={formatDate(child.created_at)} onReply={() => openReplyBox('reply', child.id)} />
-                      {renderInlineReplyBox('reply', child.id)}
-                    </View>
+                {children.length > 0 && (
+                  <View style={[styles.childrenContainer, { marginLeft: lineX }]}>
+                    {children.map(child => (
+                      <View key={child.id}>
+                        <View style={styles.nestedReply}>
+                          <View style={styles.branchConnector} />
+                          <ReplyCard
+                            reply={child}
+                            date={formatDate(child.created_at)}
+                            onReply={() => openReplyBox('reply', child.id)}
+                            nested
+                          />
+                        </View>
+                        {renderInlineReplyBox('reply', child.id)}
+                      </View>
+                    ))}
                   </View>
-                ))}
+                )}
               </View>
             );
           })}
@@ -376,17 +387,18 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
-  nestedReply: { flexDirection: 'row', paddingLeft: 20 },
-  connector: {
-    width: 28,
-    height: 28,
+  childrenContainer: {
     borderLeftWidth: 2,
+    borderColor: '#ddd',
+  },
+  nestedReply: { flexDirection: 'row', alignItems: 'flex-start' },
+  branchConnector: {
+    width: 18,
+    height: 26,
     borderBottomWidth: 2,
     borderColor: '#ddd',
     borderBottomLeftRadius: 10,
-    marginTop: -10,
-    marginLeft: 15,
-    marginRight: 1,
+    marginTop: 10,
     flexShrink: 0,
   },
   nestedContent: { flex: 1 },
