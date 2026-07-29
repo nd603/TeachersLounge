@@ -1,9 +1,32 @@
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { TLColors } from '@/constants/theme';
 import { Post } from '@/services/posts';
+import { OptionsSheet } from '@/components/OptionsSheet';
 
-export function PostCard({ post, date, onPress, onReply }: { post: Post; date: string; onPress?: () => void; onReply?: () => void }) {
+export function PostCard({
+  post, date, onPress, onReply, currentUserId, onDelete,
+}: {
+  post: Post;
+  date: string;
+  onPress?: () => void;
+  onReply?: () => void;
+  currentUserId?: string;
+  onDelete?: () => void;
+}) {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const isOwner = !!currentUserId && currentUserId === post.author_id;
+
+  const options = isOwner
+    ? [{ label: 'Delete post', icon: '🗑️', danger: true, onPress: () => onDelete?.() }]
+    : [
+        { label: 'Share', icon: '↗️', onPress: () => {} },
+        { label: 'Message', icon: '💬', onPress: () => {} },
+        { label: 'Block user', icon: '🚫', danger: true, onPress: () => {} },
+        { label: 'Report post', icon: '⚠️', danger: true, onPress: () => {} },
+      ];
+
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
       <View style={styles.postHeader}>
@@ -14,13 +37,18 @@ export function PostCard({ post, date, onPress, onReply }: { post: Post; date: s
       </View>
       <Text style={styles.postText}>{post.text}</Text>
       <View style={styles.postActions}>
-        <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setMenuVisible(true)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Text style={styles.actionLabel}>···</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={onReply}>
           <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
         </TouchableOpacity>
       </View>
+      <OptionsSheet visible={menuVisible} onClose={() => setMenuVisible(false)} options={options} />
     </TouchableOpacity>
   );
 }

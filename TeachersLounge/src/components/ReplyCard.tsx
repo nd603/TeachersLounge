@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TLColors } from '@/constants/theme';
+import { OptionsSheet } from '@/components/OptionsSheet';
 
 export type Reply = {
   id: string;
@@ -20,17 +22,31 @@ export function ReplyCard({
   onReply,
   showThreadLine,
   nested,
-  lastNested,
+  currentUserId,
+  onDelete,
 }: {
   reply: Reply;
   date: string;
   onReply?: () => void;
   showThreadLine?: boolean;
   nested?: boolean;
-  lastNested?: boolean;
+  currentUserId?: string;
+  onDelete?: () => void;
 }) {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const isOwner = !!currentUserId && currentUserId === reply.author_id;
+
+  const options = isOwner
+    ? [{ label: 'Delete reply', icon: '🗑️', danger: true, onPress: () => onDelete?.() }]
+    : [
+        { label: 'Share', icon: '↗️', onPress: () => {} },
+        { label: 'Message', icon: '💬', onPress: () => {} },
+        { label: 'Block user', icon: '🚫', danger: true, onPress: () => {} },
+        { label: 'Report reply', icon: '⚠️', danger: true, onPress: () => {} },
+      ];
+
   return (
-    <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested, lastNested && styles.cardNoBottomPad]}>
+    <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested]}>
       <View style={styles.leftCol}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{reply.author[0]}</Text>
@@ -44,12 +60,17 @@ export function ReplyCard({
         </View>
         <Text style={styles.text}>{reply.text}</Text>
         <View style={styles.actions}>
-          <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setMenuVisible(true)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.actionLabel}>···</Text>
+          </TouchableOpacity>
           <TouchableOpacity><Text style={styles.actionIcon}>🔖</Text></TouchableOpacity>
           <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
           <TouchableOpacity onPress={onReply}><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
         </View>
       </View>
+      <OptionsSheet visible={menuVisible} onClose={() => setMenuVisible(false)} options={options} />
     </View>
   );
 }

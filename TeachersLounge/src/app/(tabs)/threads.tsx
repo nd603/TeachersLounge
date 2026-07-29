@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
 import { ReplyCard, type Reply, REPLY_LEFT_PAD, REPLY_AVATAR_SIZE } from '@/components/ReplyCard';
-import { type Post, fetchPosts, createPost } from '@/services/posts';
+import { type Post, fetchPosts, createPost, deletePost } from '@/services/posts';
 import { fetchReplies, createReply } from '@/services/replies';
 import { supabase } from '@/lib/supabase';
 
@@ -27,7 +27,7 @@ const THREAD_LINE_TOP = 12 + REPLY_AVATAR_SIZE;
 const NESTED_AVATAR_CENTER_OFFSET = 12 + REPLY_AVATAR_SIZE / 2;
 
 function ReplyThreadGroup({
-  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles,
+  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles, currentUserId, onDeleteReply,
 }: {
   reply: Reply;
   children: Reply[];
@@ -36,6 +36,8 @@ function ReplyThreadGroup({
   openReplyBox: (type: 'post' | 'reply', id: string) => void;
   renderInlineReplyBox: (type: 'post' | 'reply', id: string) => React.ReactNode;
   styles: Record<string, any>;
+  currentUserId: string;
+  onDeleteReply: (id: string) => void;
 }) {
   const groupRef = useRef<View>(null);
   const lastChildRef = useRef<View>(null);
@@ -68,6 +70,8 @@ function ReplyThreadGroup({
         date={formatDate(reply.created_at)}
         onReply={() => openReplyBox('reply', reply.id)}
         showThreadLine={false}
+        currentUserId={currentUserId}
+        onDelete={() => onDeleteReply(reply.id)}
       />
       {renderInlineReplyBox('reply', reply.id)}
       {children.length > 0 && (
@@ -87,6 +91,8 @@ function ReplyThreadGroup({
                     date={formatDate(child.created_at)}
                     onReply={() => openReplyBox('reply', child.id)}
                     nested
+                    currentUserId={currentUserId}
+                    onDelete={() => onDeleteReply(child.id)}
                   />
                 </View>
                 {renderInlineReplyBox('reply', child.id)}
@@ -113,12 +119,23 @@ export default function ThreadsScreen() {
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replyError, setReplyError] = useState('');
+  const [currentUserId, setCurrentUserId] = useState('');
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
 
   useEffect(() => {
     loadPosts();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setCurrentUserId(user.id);
+    });
   }, []);
+
+  const handleDeletePost = async (postId: string) => {
+    const { error } = await deletePost(postId);
+    if (error) return;
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    if (viewingPost?.id === postId) setViewingPost(null);
+  };
 
   const loadPosts = async () => {
     setLoading(true);
@@ -144,6 +161,15 @@ export default function ThreadsScreen() {
     setAnonymous(false);
     setCreateVisible(false);
     openPost(data);
+  };
+
+  const handleDeleteReply = async (replyId: string) => {
+    const { error } = await supabase.from('replies').delete().eq('id', replyId);
+    if (error || !viewingPost) return;
+    setReplies(prev => ({
+      ...prev,
+      [viewingPost.id]: (prev[viewingPost.id] ?? []).filter(r => r.id !== replyId),
+    }));
   };
 
   const handleReply = async () => {
@@ -320,7 +346,7 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
           {postReplies.filter(r => !r.parent_reply_id).map((reply, index) => {
@@ -335,6 +361,8 @@ export default function ThreadsScreen() {
                 openReplyBox={openReplyBox}
                 renderInlineReplyBox={renderInlineReplyBox}
                 styles={styles}
+                currentUserId={currentUserId}
+                onDeleteReply={handleDeleteReply}
               />
             );
           })}
@@ -381,7 +409,7 @@ export default function ThreadsScreen() {
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
             <View key={post.id}>
-              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} />
+              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} currentUserId={currentUserId} onDelete={() => handleDeletePost(post.id)} />
               <View style={styles.divider} />
             </View>
           ))
