@@ -247,8 +247,8 @@ export default function ThreadsScreen() {
           <View style={styles.divider} />
           {postReplies.filter(r => !r.parent_reply_id).map(reply => {
             const children = postReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
-            // Avatar center x relative to screen left = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE/2
-            const lineX = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2;
+            // Left edge of the 2px thread line = avatar center - 1
+            const lineX = REPLY_LEFT_PAD + REPLY_AVATAR_SIZE / 2 - 1;
             return (
               <View key={reply.id}>
                 <ReplyCard
