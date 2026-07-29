@@ -15,6 +15,7 @@ import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
 import { ReplyCard, type Reply } from '@/components/ReplyCard';
 import { type Post, fetchPosts, createPost } from '@/services/posts';
+import { fetchReplies, createReply } from '@/services/replies';
 import { supabase } from '@/lib/supabase';
 
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
@@ -62,26 +63,31 @@ export default function ThreadsScreen() {
     setTopicDropdownOpen(false);
     setAnonymous(false);
     setCreateVisible(false);
-    setViewingPost(data);
+    openPost(data);
   };
 
   const handleReply = async () => {
     if (!replyText.trim() || !viewingPost || !replyingToId) return;
     const { data: { user } } = await supabase.auth.getUser();
-    const newReply: Reply = {
-      id: Date.now().toString(),
+    const { data, error } = await createReply({
       post_id: viewingPost.id,
       text: replyText.trim(),
       author: user?.user_metadata?.first_name ?? 'Teacher',
       author_id: user?.id ?? '',
-      created_at: new Date().toISOString(),
-    };
+    });
+    if (error || !data) return;
     setReplies(prev => ({
       ...prev,
-      [viewingPost.id]: [...(prev[viewingPost.id] ?? []), newReply],
+      [viewingPost.id]: [...(prev[viewingPost.id] ?? []), data],
     }));
     setReplyText('');
     setReplyingToId(null);
+  };
+
+  const openPost = async (post: Post) => {
+    setViewingPost(post);
+    const { data } = await fetchReplies(post.id);
+    if (data) setReplies(prev => ({ ...prev, [post.id]: data }));
   };
 
   const openReplyBox = (id: string) => {
@@ -275,7 +281,7 @@ export default function ThreadsScreen() {
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
             <View key={post.id}>
-              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => setViewingPost(post)} />
+              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} />
               <View style={styles.divider} />
             </View>
           ))
