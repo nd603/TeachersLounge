@@ -28,7 +28,7 @@ export function ReplyCard({
   nested?: boolean;
 }) {
   return (
-    <View style={[styles.card, nested && styles.cardNested]}>
+    <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested]}>
       <View style={styles.leftCol}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{reply.author[0]}</Text>
@@ -57,8 +57,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingLeft: REPLY_LEFT_PAD,
     paddingRight: 20,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
+  cardNoBottomPad: { paddingBottom: 0 },
   cardNested: { paddingLeft: 0 },
   leftCol: { width: REPLY_AVATAR_SIZE, alignItems: 'center', marginRight: 10 },
   avatar: {

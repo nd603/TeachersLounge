@@ -394,11 +394,11 @@ const styles = StyleSheet.create({
   nestedReply: { flexDirection: 'row', alignItems: 'flex-start' },
   branchConnector: {
     width: 18,
-    height: 26,
+    height: 20,
     borderBottomWidth: 2,
     borderColor: '#ddd',
     borderBottomLeftRadius: 10,
-    marginTop: 10,
+    marginTop: 8,
     flexShrink: 0,
   },
   nestedContent: { flex: 1 },
