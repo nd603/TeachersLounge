@@ -10,7 +10,7 @@ export type Reply = {
   created_at: string;
 };
 
-export function ReplyCard({ reply, date }: { reply: Reply; date: string }) {
+export function ReplyCard({ reply, date, onReply }: { reply: Reply; date: string; onReply?: () => void }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -23,7 +23,7 @@ export function ReplyCard({ reply, date }: { reply: Reply; date: string }) {
         <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
         <TouchableOpacity><Text style={styles.actionIcon}>🔖</Text></TouchableOpacity>
         <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onReply}><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
       </View>
     </View>
   );

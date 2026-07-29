@@ -31,6 +31,7 @@ export default function ThreadsScreen() {
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [replies, setReplies] = useState<Record<string, Reply[]>>({});
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const replyInputRef = useRef<TextInput>(null);
 
@@ -65,7 +66,7 @@ export default function ThreadsScreen() {
   };
 
   const handleReply = async () => {
-    if (!replyText.trim() || !viewingPost) return;
+    if (!replyText.trim() || !viewingPost || !replyingToId) return;
     const { data: { user } } = await supabase.auth.getUser();
     const newReply: Reply = {
       id: Date.now().toString(),
@@ -77,9 +78,16 @@ export default function ThreadsScreen() {
     };
     setReplies(prev => ({
       ...prev,
-      [viewingPost.id]: [prev[viewingPost.id] ?? [], newReply].flat(),
+      [viewingPost.id]: [...(prev[viewingPost.id] ?? []), newReply],
     }));
     setReplyText('');
+    setReplyingToId(null);
+  };
+
+  const openReplyBox = (id: string) => {
+    setReplyingToId(id);
+    setReplyText('');
+    setTimeout(() => replyInputRef.current?.focus(), 100);
   };
 
   const filteredPosts = activeTab === 'My Feed'
@@ -177,6 +185,34 @@ export default function ThreadsScreen() {
     </Modal>
   );
 
+  const InlineReplyBox = ({ parentId }: { parentId: string }) => (
+    replyingToId === parentId ? (
+      <View style={styles.inlineReplyBox}>
+        <TextInput
+          ref={replyInputRef}
+          style={styles.inlineReplyInput}
+          placeholder="Write a reply..."
+          placeholderTextColor={TLColors.gray500}
+          value={replyText}
+          onChangeText={setReplyText}
+          multiline
+          autoFocus
+        />
+        <View style={styles.inlineReplyActions}>
+          <TouchableOpacity onPress={() => { setReplyingToId(null); setReplyText(''); }}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.sendBtn, !replyText.trim() && { opacity: 0.4 }]}
+            onPress={handleReply}
+            disabled={!replyText.trim()}>
+            <Text style={styles.sendBtnText}>Reply</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    ) : null
+  );
+
   // Post detail view
   if (viewingPost) {
     const postReplies = replies[viewingPost.id] ?? [];
@@ -184,34 +220,20 @@ export default function ThreadsScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header />
         <ScrollView style={styles.feed}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); }}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => replyInputRef.current?.focus()} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox(viewingPost.id)} />
+          <InlineReplyBox parentId={viewingPost.id} />
           <View style={styles.divider} />
           {postReplies.map(reply => (
-            <ReplyCard key={reply.id} reply={reply} date={formatDate(reply.created_at)} />
+            <View key={reply.id}>
+              <ReplyCard reply={reply} date={formatDate(reply.created_at)} onReply={() => openReplyBox(reply.id)} />
+              <InlineReplyBox parentId={reply.id} />
+            </View>
           ))}
           <View style={{ height: 100 }} />
         </ScrollView>
-        <View style={styles.replyBar}>
-          <TextInput
-            ref={replyInputRef}
-            style={styles.replyInput}
-            placeholder="Write your message"
-            placeholderTextColor={TLColors.gray500}
-            value={replyText}
-            onChangeText={setReplyText}
-            onSubmitEditing={handleReply}
-            returnKeyType="send"
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, !replyText.trim() && { opacity: 0.4 }]}
-            onPress={handleReply}
-            disabled={!replyText.trim()}>
-            <Text style={styles.sendBtnText}>↑</Text>
-          </TouchableOpacity>
-        </View>
         <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
@@ -318,21 +340,23 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
   fabText: { fontSize: 32, color: TLColors.white, lineHeight: 36 },
-  replyBar: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: '#f0f0f0',
-    backgroundColor: TLColors.white,
+  inlineReplyBox: {
+    marginHorizontal: 20, marginBottom: 12,
+    borderWidth: 1, borderColor: TLColors.gray300, borderRadius: 10,
+    padding: 12, backgroundColor: '#fafafa',
   },
-  replyInput: {
-    flex: 1, backgroundColor: '#f5f5f5', borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8, fontSize: 14,
+  inlineReplyInput: {
+    fontSize: 14, color: '#222', minHeight: 60, textAlignVertical: 'top',
   },
+  inlineReplyActions: {
+    flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 8, alignItems: 'center',
+  },
+  cancelText: { fontSize: 14, color: TLColors.gray500 },
   sendBtn: {
-    width: 34, height: 34, borderRadius: 17,
-    backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: TLColors.primary, borderRadius: 20,
+    paddingHorizontal: 16, paddingVertical: 7,
   },
-  sendBtnText: { color: TLColors.white, fontSize: 16, fontWeight: '700' },
+  sendBtnText: { color: TLColors.white, fontSize: 14, fontWeight: '600' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalSheet: {
     backgroundColor: TLColors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20,
