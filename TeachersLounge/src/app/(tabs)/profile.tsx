@@ -235,8 +235,8 @@ export default function ProfileScreen() {
         data={activeTab === 'Posts' ? posts : []}
         keyExtractor={p => p.id}
         renderItem={renderPost}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmpty}
+        ListHeaderComponent={renderHeader()}
+        ListEmptyComponent={renderEmpty()}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
