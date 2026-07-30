@@ -23,6 +23,17 @@ import { supabase } from '@/lib/supabase';
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
 const TOPICS = ['Mental Health', 'Class Management', 'Administration', 'Resources', 'Funny'];
 
+const WEEKLY_PROMPT_KEY = 'weekly-prompt';
+const WEEKLY_PROMPT: Post = {
+  id: WEEKLY_PROMPT_KEY,
+  text: 'What is something you started integrating into your classroom this year that made your job easier?',
+  topic: 'Class Management',
+  author: 'Teachers\' Lounge',
+  author_id: '',
+  anonymous: false,
+  created_at: new Date('2026-03-01').toISOString(),
+};
+
 // Thread line starts below parent avatar:  paddingTop + full avatar
 const THREAD_LINE_TOP = 12 + REPLY_AVATAR_SIZE;
 // Avatar center within a nested card: paddingTop + half avatar
@@ -124,15 +135,22 @@ export default function ThreadsScreen() {
   const [replyError, setReplyError] = useState('');
   const [currentUserId, setCurrentUserId] = useState('');
   const [promptMenuVisible, setPromptMenuVisible] = useState(false);
+  const [viewingPrompt, setViewingPrompt] = useState(false);
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
 
   useEffect(() => {
     loadPosts();
+    loadPromptReplies();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setCurrentUserId(user.id);
     });
   }, []);
+
+  const loadPromptReplies = async () => {
+    const { data } = await fetchReplies(WEEKLY_PROMPT_KEY);
+    if (data) setReplies(prev => ({ ...prev, [WEEKLY_PROMPT_KEY]: data }));
+  };
 
   const handleDeletePost = async (postId: string) => {
     const { error } = await deletePost(postId);
@@ -169,22 +187,25 @@ export default function ThreadsScreen() {
 
   const handleDeleteReply = async (replyId: string) => {
     const { error } = await supabase.from('replies').delete().eq('id', replyId);
-    if (error || !viewingPost) return;
+    if (error) return;
+    const postId = viewingPrompt ? WEEKLY_PROMPT_KEY : viewingPost?.id;
+    if (!postId) return;
     setReplies(prev => ({
       ...prev,
-      [viewingPost.id]: (prev[viewingPost.id] ?? []).filter(r => r.id !== replyId),
+      [postId]: (prev[postId] ?? []).filter(r => r.id !== replyId),
     }));
   };
 
   const handleReply = async () => {
     const text = replyTextRef.current.trim();
-    if (!text || !viewingPost || !replyingToId) return;
+    if (!text || (!viewingPost && !viewingPrompt) || !replyingToId) return;
     setReplyError('');
     const [type, id] = replyingToId.split(':');
     const parentReplyId = type === 'reply' ? id : null;
+    const postId = viewingPrompt ? WEEKLY_PROMPT_KEY : viewingPost!.id;
     const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await createReply({
-      post_id: viewingPost.id,
+      post_id: postId,
       text,
       author: user?.user_metadata?.first_name ?? 'Teacher',
       author_id: user?.id ?? '',
@@ -196,7 +217,7 @@ export default function ThreadsScreen() {
     }
     setReplies(prev => ({
       ...prev,
-      [viewingPost.id]: [...(prev[viewingPost.id] ?? []), data],
+      [postId]: [...(prev[postId] ?? []), data],
     }));
     setReplyText('');
     replyTextRef.current = '';
@@ -248,7 +269,7 @@ export default function ThreadsScreen() {
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll} contentContainerStyle={styles.tabsContent}>
         {TABS.map(tab => (
-          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => { setActiveTab(tab); setViewingPost(null); }}>
+          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => { setActiveTab(tab); setViewingPost(null); setViewingPrompt(false); }}>
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
             {activeTab === tab && <View style={styles.tabUnderline} />}
           </TouchableOpacity>
@@ -341,6 +362,63 @@ export default function ThreadsScreen() {
     ) : null;
 
   // Post detail view
+  if (viewingPrompt) {
+    const promptReplies = replies[WEEKLY_PROMPT_KEY] ?? [];
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <Header />
+        <ScrollView style={styles.feed}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPrompt(false); setReplyText(''); setReplyingToId(null); }}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <View style={styles.promptCard}>
+            <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
+            <View style={styles.promptMeta}>
+              <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
+              <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
+            </View>
+            <Text style={styles.promptQuestion}>{WEEKLY_PROMPT.text}</Text>
+            <View style={styles.postActions}>
+              <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.actionLabel}>···</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => openReplyBox('post', WEEKLY_PROMPT_KEY)}>
+                <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+              </TouchableOpacity>
+            </View>
+            <OptionsSheet visible={promptMenuVisible} onClose={() => setPromptMenuVisible(false)} options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]} />
+          </View>
+          {renderInlineReplyBox('post', WEEKLY_PROMPT_KEY)}
+          <View style={styles.divider} />
+          {promptReplies.filter(r => !r.parent_reply_id).map((reply, index) => {
+            const children = promptReplies.filter(r => String(r.parent_reply_id) === String(reply.id));
+            return (
+              <ReplyThreadGroup
+                key={reply.id}
+                reply={reply}
+                children={children}
+                index={index}
+                formatDate={formatDate}
+                openReplyBox={openReplyBox}
+                renderInlineReplyBox={renderInlineReplyBox}
+                styles={styles}
+                currentUserId={currentUserId}
+                onDeleteReply={handleDeleteReply}
+              />
+            );
+          })}
+          <View style={{ height: 100 }} />
+        </ScrollView>
+        <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+        {createPostModal}
+      </SafeAreaView>
+    );
+  }
+
   if (viewingPost) {
     const postReplies = replies[viewingPost.id] ?? [];
     return (
@@ -385,7 +463,7 @@ export default function ThreadsScreen() {
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
         {/* Weekly Community Prompt */}
-        <View style={styles.promptCard}>
+        <TouchableOpacity style={styles.promptCard} onPress={() => setViewingPrompt(true)} activeOpacity={0.85}>
           <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
           <View style={styles.promptMeta}>
             <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
@@ -394,20 +472,37 @@ export default function ThreadsScreen() {
           <Text style={styles.promptQuestion}>
             What is something you started integrating into your classroom this year that made your job easier?
           </Text>
+          {/* Top 3 reply previews */}
+          {(replies[WEEKLY_PROMPT_KEY] ?? []).slice(0, 3).map(r => (
+            <View key={r.id} style={styles.promptReplyPreview}>
+              <View style={styles.promptReplyAvatar}>
+                <Text style={styles.promptReplyAvatarText}>{r.author[0]}</Text>
+              </View>
+              <View style={styles.promptReplyBody}>
+                <Text style={styles.promptReplyAuthor}>{r.author}</Text>
+                <Text style={styles.promptReplyText} numberOfLines={2}>{r.text}</Text>
+              </View>
+            </View>
+          ))}
+          {(replies[WEEKLY_PROMPT_KEY] ?? []).length === 0 && (
+            <Text style={styles.promptNoReplies}>No responses yet — be the first!</Text>
+          )}
           <View style={styles.postActions}>
-            <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity onPress={e => { e.stopPropagation?.(); setPromptMenuVisible(true); }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Text style={styles.actionLabel}>···</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
             <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => setViewingPrompt(true)}>
+              <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+            </TouchableOpacity>
           </View>
           <OptionsSheet
             visible={promptMenuVisible}
             onClose={() => setPromptMenuVisible(false)}
             options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]}
           />
-        </View>
+        </TouchableOpacity>
         <View style={styles.divider} />
 
         {loading ? (
@@ -475,6 +570,13 @@ const styles = StyleSheet.create({
   promptTagText: { fontSize: 12, color: '#333' },
   promptDate: { fontSize: 12, color: '#888' },
   promptQuestion: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
+  promptReplyPreview: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
+  promptReplyAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: TLColors.gray300, alignItems: 'center', justifyContent: 'center' },
+  promptReplyAvatarText: { color: '#fff', fontWeight: '700', fontSize: 11 },
+  promptReplyBody: { flex: 1, backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  promptReplyAuthor: { fontSize: 12, fontWeight: '600', color: '#111', marginBottom: 2 },
+  promptReplyText: { fontSize: 12, color: '#444', lineHeight: 16 },
+  promptNoReplies: { fontSize: 13, color: TLColors.gray500, fontStyle: 'italic', marginBottom: 12 },
   postActions: { flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'flex-end' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionIcon: { fontSize: 16, color: '#888' },
