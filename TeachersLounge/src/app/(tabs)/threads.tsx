@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
 import { ReplyCard, type Reply, REPLY_LEFT_PAD, REPLY_AVATAR_SIZE } from '@/components/ReplyCard';
+import { OptionsSheet } from '@/components/OptionsSheet';
 import { type Post, fetchPosts, createPost, deletePost } from '@/services/posts';
 import { fetchReplies, createReply } from '@/services/replies';
 import { supabase } from '@/lib/supabase';
@@ -122,6 +123,7 @@ export default function ThreadsScreen() {
   const [replyText, setReplyText] = useState('');
   const [replyError, setReplyError] = useState('');
   const [currentUserId, setCurrentUserId] = useState('');
+  const [promptMenuVisible, setPromptMenuVisible] = useState(false);
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
 
@@ -393,10 +395,18 @@ export default function ThreadsScreen() {
             What is something you started integrating into your classroom this year that made your job easier?
           </Text>
           <View style={styles.postActions}>
-            <TouchableOpacity><Text style={styles.actionLabel}>···</Text></TouchableOpacity>
-            <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
-            <TouchableOpacity><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Text style={styles.actionLabel}>···</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text></TouchableOpacity>
           </View>
+          <OptionsSheet
+            visible={promptMenuVisible}
+            onClose={() => setPromptMenuVisible(false)}
+            options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]}
+          />
         </View>
         <View style={styles.divider} />
 
@@ -465,6 +475,10 @@ const styles = StyleSheet.create({
   promptTagText: { fontSize: 12, color: '#333' },
   promptDate: { fontSize: 12, color: '#888' },
   promptQuestion: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
+  postActions: { flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'flex-end' },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  actionIcon: { fontSize: 16, color: '#888' },
+  actionLabel: { fontSize: 13, color: '#888' },
   divider: { height: 1, backgroundColor: '#f0f0f0' },
   noPostsContainer: { padding: 40, alignItems: 'center' },
   noPostsText: { fontSize: 14, color: TLColors.gray500, fontStyle: 'italic' },

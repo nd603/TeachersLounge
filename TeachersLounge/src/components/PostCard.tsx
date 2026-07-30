@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   topicBadgeText: { fontSize: 12, color: TLColors.primary, fontWeight: '500' },
   postDate: { fontSize: 12, color: '#888', marginLeft: 'auto' },
   postText: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
-  postActions: { flexDirection: 'row', gap: 16, alignItems: 'center' },
+  postActions: { flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'flex-end' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionIcon: { fontSize: 16, color: '#888' },
   actionLabel: { fontSize: 13, color: '#888' },
