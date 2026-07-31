@@ -3,48 +3,10 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
+import { useSavedResources } from '@/context/SavedResourcesContext';
 
 type Tab = 'Saved' | 'Boards';
 type Filter = 'All Resources' | 'Lesson Plans' | 'Activities';
-
-const SAVED_RESOURCES = [
-  {
-    id: '1',
-    title: 'Paragraph of the Week – Writing Prompts for Paragraph Writing and a…',
-    price: '$3.99',
-    creator: 'Mrs. E\'s Class',
-    savedAgo: '30m ago',
-    type: 'Activities',
-    bg: '#f5f0ff',
-  },
-  {
-    id: '2',
-    title: 'STEAM Activities – Engaging Lessons for the Elementary Classroom',
-    price: 'FREE',
-    creator: 'ScienceFun',
-    savedAgo: '2h ago',
-    type: 'Activities',
-    bg: '#e8f8f0',
-  },
-  {
-    id: '3',
-    title: 'U.S. and World History Sub Plans No Prep Emergency Social Studies Plans',
-    price: '$6.99',
-    creator: 'SunnyTeacher',
-    savedAgo: '30m ago',
-    type: 'Lesson Plans',
-    bg: '#fff8e8',
-  },
-  {
-    id: '4',
-    title: 'Vietnam War: Explore & Discover!',
-    price: '$4.50',
-    creator: 'HistoryHive',
-    savedAgo: '1d ago',
-    type: 'Lesson Plans',
-    bg: '#e8f4e8',
-  },
-];
 
 const BOARDS = [
   { id: '1', name: 'Math Manipulatives', count: 12, bg: '#d0eaff' },
@@ -59,11 +21,11 @@ export default function LibraryScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('Saved');
   const [activeFilter, setActiveFilter] = useState<Filter>('All Resources');
   const [search, setSearch] = useState('');
+  const { savedResources, toggleSave, isSaved } = useSavedResources();
 
-  const filteredResources = SAVED_RESOURCES.filter(r => {
-    const matchesFilter = activeFilter === 'All Resources' || r.type === activeFilter;
+  const filteredResources = savedResources.filter(r => {
     const matchesSearch = !search || r.title.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
 
   return (
@@ -115,24 +77,24 @@ export default function LibraryScreen() {
           </ScrollView>
 
           {/* Sort by */}
-          <View style={styles.sortRow}>
-            <TouchableOpacity style={styles.sortBtn}>
-              <Text style={styles.sortText}>Sort By</Text>
-              <Ionicons name="chevron-down" size={16} color="#111" />
-            </TouchableOpacity>
-          </View>
+          {filteredResources.length > 0 && (
+            <View style={styles.sortRow}>
+              <TouchableOpacity style={styles.sortBtn}>
+                <Text style={styles.sortText}>Sort By</Text>
+                <Ionicons name="chevron-down" size={16} color="#111" />
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Resource cards */}
           {filteredResources.map(r => (
             <TouchableOpacity key={r.id} style={styles.resourceCard}>
-              {/* Image area */}
               <View style={[styles.resourceImg, { backgroundColor: r.bg }]}>
-                <Ionicons name="document-text-outline" size={48} color="rgba(0,0,0,0.2)" />
-                <TouchableOpacity style={styles.bookmarkBtn}>
-                  <Ionicons name="bookmark" size={18} color="#111" />
+                <Ionicons name={r.icon as any} size={48} color="rgba(0,0,0,0.2)" />
+                <TouchableOpacity style={styles.bookmarkBtn} onPress={() => toggleSave(r)}>
+                  <Ionicons name={isSaved(r.id) ? 'bookmark' : 'bookmark-outline'} size={18} color={isSaved(r.id) ? TLColors.primary : '#111'} />
                 </TouchableOpacity>
               </View>
-              {/* Info */}
               <View style={styles.resourceInfo}>
                 <Text style={styles.resourcePrice}>{r.price}</Text>
                 <Text style={styles.resourceTitle} numberOfLines={2}>{r.title}</Text>
@@ -141,7 +103,6 @@ export default function LibraryScreen() {
                     <Text style={styles.creatorAvatarText}>{r.creator[0]}</Text>
                   </View>
                   <Text style={styles.creatorName}>{r.creator}</Text>
-                  <Text style={styles.savedAgo}>Saved {r.savedAgo}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -149,8 +110,9 @@ export default function LibraryScreen() {
 
           {filteredResources.length === 0 && (
             <View style={styles.empty}>
-              <Ionicons name="bookmark-outline" size={40} color={TLColors.gray300} />
-              <Text style={styles.emptyText}>Nothing saved here yet</Text>
+              <Ionicons name="bookmark-outline" size={48} color={TLColors.gray300} />
+              <Text style={styles.emptyTitle}>Nothing saved yet</Text>
+              <Text style={styles.emptyText}>Tap the bookmark icon on any resource to save it here</Text>
             </View>
           )}
 
@@ -235,9 +197,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20, marginBottom: 16,
     borderWidth: 1, borderColor: '#e8e8e8', borderRadius: 12, overflow: 'hidden',
   },
-  resourceImg: {
-    height: 180, alignItems: 'center', justifyContent: 'center',
-  },
+  resourceImg: { height: 180, alignItems: 'center', justifyContent: 'center' },
   bookmarkBtn: {
     position: 'absolute', top: 12, right: 12,
     backgroundColor: '#fff', borderRadius: 8,
@@ -254,10 +214,10 @@ const styles = StyleSheet.create({
   },
   creatorAvatarText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   creatorName: { fontSize: 13, color: '#555', flex: 1 },
-  savedAgo: { fontSize: 12, color: '#aaa' },
 
-  empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { fontSize: 14, color: TLColors.gray500, fontStyle: 'italic' },
+  empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 40, gap: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: '#111' },
+  emptyText: { fontSize: 14, color: TLColors.gray500, textAlign: 'center', lineHeight: 20 },
 
   boardsContainer: { paddingHorizontal: 20, paddingTop: 16 },
   createBoard: {
@@ -277,8 +237,7 @@ const styles = StyleSheet.create({
     marginBottom: 8, alignItems: 'flex-start', justifyContent: 'flex-start', padding: 10,
   },
   boardIconBadge: {
-    backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 8,
-    padding: 6,
+    backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: 6,
   },
   boardCountBadge: {
     position: 'absolute', bottom: 0, left: 0, right: 0,

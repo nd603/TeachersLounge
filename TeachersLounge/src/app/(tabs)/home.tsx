@@ -3,11 +3,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { TLColors } from '@/constants/theme';
+import { useSavedResources, type Resource } from '@/context/SavedResourcesContext';
 
-const RESOURCES = [
-  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', icon: 'clipboard-outline' as const, bg: '#dff0ee' },
-  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: '$9.00', creator: 'Eloise_D', icon: 'book-outline' as const, bg: '#f0eaff' },
-  { id: '3', title: 'Math Morning Work — Grade 7', price: '$4.50', creator: 'A. Miller', icon: 'pencil-outline' as const, bg: '#fff3e0' },
+const RESOURCES: Resource[] = [
+  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', icon: 'clipboard-outline', bg: '#dff0ee' },
+  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: '$9.00', creator: 'Eloise_D', icon: 'book-outline', bg: '#f0eaff' },
+  { id: '3', title: 'Math Morning Work — Grade 7', price: '$4.50', creator: 'A. Miller', icon: 'pencil-outline', bg: '#fff3e0' },
 ];
 
 const TEACHERS = [
@@ -17,6 +18,8 @@ const TEACHERS = [
 ];
 
 export default function HomeScreen() {
+  const { toggleSave, isSaved } = useSavedResources();
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -73,19 +76,29 @@ export default function HomeScreen() {
           </View>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll} contentContainerStyle={styles.hScrollContent}>
-          {RESOURCES.map(r => (
-            <TouchableOpacity key={r.id} style={styles.resourceCard}>
-              <View style={[styles.resourceImg, { backgroundColor: r.bg }]}>
-                <Ionicons name={r.icon} size={36} color="#555" />
-                <View style={styles.bookmark}>
-                  <Ionicons name="bookmark-outline" size={16} color="#555" />
+          {RESOURCES.map(r => {
+            const saved = isSaved(r.id);
+            return (
+              <TouchableOpacity key={r.id} style={styles.resourceCard}>
+                <View style={[styles.resourceImg, { backgroundColor: r.bg }]}>
+                  <Ionicons name={r.icon as any} size={36} color="#555" />
+                  <TouchableOpacity
+                    style={styles.bookmark}
+                    onPress={() => toggleSave(r)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons
+                      name={saved ? 'bookmark' : 'bookmark-outline'}
+                      size={16}
+                      color={saved ? TLColors.primary : '#555'}
+                    />
+                  </TouchableOpacity>
                 </View>
-              </View>
-              <Text style={styles.resourcePrice}>{r.price}</Text>
-              <Text style={styles.resourceTitle} numberOfLines={2}>{r.title}</Text>
-              <Text style={styles.resourceCreator}>{r.creator}</Text>
-            </TouchableOpacity>
-          ))}
+                <Text style={styles.resourcePrice}>{r.price}</Text>
+                <Text style={styles.resourceTitle} numberOfLines={2}>{r.title}</Text>
+                <Text style={styles.resourceCreator}>{r.creator}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         <View style={styles.divider} />
