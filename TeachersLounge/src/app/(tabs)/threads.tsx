@@ -154,7 +154,6 @@ export default function ThreadsScreen() {
     if (openPrompt === 'true') {
       setViewingPrompt(true);
       setPromptSource('home');
-      router.setParams({ openPrompt: undefined });
     }
   }, [openPrompt]);
 
