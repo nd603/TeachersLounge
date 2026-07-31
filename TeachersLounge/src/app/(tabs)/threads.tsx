@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   feed: { flex: 1 },
   backBtn: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 4 },
   backText: { fontSize: 16, color: TLColors.black, fontWeight: '500' },
-  promptCard: { padding: 20 },
+  promptCard: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 20 },
   promptTitle: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 10 },
   promptMeta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   promptTag: { borderWidth: 1.5, borderColor: '#333', borderRadius: 50, paddingHorizontal: 10, paddingVertical: 3 },
