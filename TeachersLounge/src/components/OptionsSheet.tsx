@@ -1,8 +1,9 @@
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export type OptionItem = {
   label: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   danger?: boolean;
 };
@@ -28,7 +29,7 @@ export function OptionsSheet({
             onPress={() => { onClose(); opt.onPress(); }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.icon, opt.danger && styles.dangerIcon]}>{opt.icon}</Text>
+            <Ionicons name={opt.icon} size={22} color={opt.danger ? '#e53935' : '#111'} style={styles.icon} />
             <Text style={[styles.label, opt.danger && styles.dangerLabel]}>{opt.label}</Text>
           </TouchableOpacity>
         ))}
@@ -60,9 +61,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   optionBorder: { borderTopWidth: 1, borderTopColor: '#f0f0f0' },
-  icon: { fontSize: 22, width: 28, textAlign: 'center' },
+  icon: { width: 28, textAlign: 'center' },
   label: { fontSize: 16, color: '#111', fontWeight: '400' },
-  dangerIcon: { color: '#e53935' },
   dangerLabel: { color: '#e53935' },
   cancelGap: { height: 8, backgroundColor: '#f5f5f5', marginHorizontal: -20, marginTop: 8 },
   cancelBtn: { paddingVertical: 16, alignItems: 'center' },

@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 
 type Message = {
@@ -72,7 +73,7 @@ export default function ConversationScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#111" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
@@ -87,7 +88,7 @@ export default function ConversationScreen() {
           </View>
         </View>
         <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.menuDots}>···</Text>
+          <Ionicons name="ellipsis-horizontal" size={22} color="#111" />
         </TouchableOpacity>
       </View>
 
@@ -121,7 +122,7 @@ export default function ConversationScreen() {
         {/* Input bar */}
         <View style={styles.inputBar}>
           <TouchableOpacity style={styles.inputIconBtn}>
-            <Text style={styles.inputIcon}>📎</Text>
+            <Ionicons name="attach-outline" size={24} color="#888" />
           </TouchableOpacity>
           <TextInput
             style={styles.textInput}
@@ -139,8 +140,12 @@ export default function ConversationScreen() {
             </TouchableOpacity>
           ) : (
             <View style={styles.inputRightIcons}>
-              <TouchableOpacity style={styles.inputIconBtn}><Text style={styles.inputIcon}>📷</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.inputIconBtn}><Text style={styles.inputIcon}>🎤</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.inputIconBtn}>
+                <Ionicons name="camera-outline" size={24} color="#888" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.inputIconBtn}>
+                <Ionicons name="mic-outline" size={24} color="#888" />
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -157,7 +162,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 10,
     borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
   },
-  backArrow: { fontSize: 22, color: '#111' },
   headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, marginLeft: 12 },
   headerAvatar: {
     width: 40, height: 40, borderRadius: 20,
@@ -168,7 +172,6 @@ const styles = StyleSheet.create({
   activeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1 },
   activeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4caf50' },
   activeText: { fontSize: 12, color: TLColors.gray500 },
-  menuDots: { fontSize: 20, color: '#111', letterSpacing: 1 },
   messagesList: { padding: 16, flexGrow: 1 },
   dateRow: { alignItems: 'center', marginBottom: 16 },
   dateLabel: { fontSize: 13, color: TLColors.gray500, fontWeight: '500' },
@@ -207,7 +210,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#f0f0f0', backgroundColor: '#fff',
   },
   inputIconBtn: { padding: 4, marginBottom: 2 },
-  inputIcon: { fontSize: 22 },
   textInput: {
     flex: 1, fontSize: 15, color: '#111',
     backgroundColor: '#f5f5f5', borderRadius: 20,

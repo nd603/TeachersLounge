@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/services/auth';
@@ -128,7 +129,7 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>My Lounge</Text>
           </View>
           <TouchableOpacity style={styles.settingsBtn} onPress={() => setSettingsVisible(true)}>
-            <Text style={styles.settingsIcon}>⚙️</Text>
+            <Ionicons name="settings-outline" size={24} color="#111" />
           </TouchableOpacity>
         </View>
       </View>
@@ -224,7 +225,7 @@ export default function ProfileScreen() {
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>Settings</Text>
             <TouchableOpacity style={styles.sheetRow} onPress={handleSignOut}>
-              <Text style={styles.sheetRowIcon}>🚪</Text>
+              <Ionicons name="log-out-outline" size={22} color={TLColors.danger} />
               <Text style={styles.sheetRowTextDanger}>Sign Out</Text>
             </TouchableOpacity>
           </Pressable>
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
   statCount: { fontSize: 16, fontWeight: '700', color: '#111' },
   statLabel: { fontSize: 11, color: TLColors.gray500 },
   settingsBtn: { padding: 4 },
-  settingsIcon: { fontSize: 22 },
+  settingsIcon: {},
 
   // Name
   nameSection: { paddingHorizontal: 20, marginTop: 10 },
@@ -332,6 +333,6 @@ const styles = StyleSheet.create({
   sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#ddd', alignSelf: 'center', marginBottom: 16 },
   sheetTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 16 },
   sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
-  sheetRowIcon: { fontSize: 20 },
+  sheetRowIcon: {},
   sheetRowTextDanger: { fontSize: 15, color: TLColors.danger, fontWeight: '500' },
 });

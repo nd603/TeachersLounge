@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 
 export default function MessagesScreen() {
@@ -11,22 +12,22 @@ export default function MessagesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#111" />
         </TouchableOpacity>
         <View style={styles.headerRight}>
-          <TouchableOpacity><Text style={styles.headerIcon}>🔔</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.headerIcon}>💬</Text></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
 
       {/* Search row */}
       <View style={styles.searchRow}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={16} color={TLColors.gray500} />
           <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor={TLColors.gray500} />
         </View>
         <TouchableOpacity style={styles.composeBtn}>
-          <Text style={styles.composeIcon}>✏️</Text>
+          <Ionicons name="create-outline" size={24} color="#111" />
         </TouchableOpacity>
       </View>
 
@@ -61,9 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 12,
   },
-  backArrow: { fontSize: 22, color: '#111' },
   headerRight: { flexDirection: 'row', gap: 16 },
-  headerIcon: { fontSize: 22 },
   searchRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingHorizontal: 16, paddingBottom: 12,
@@ -72,10 +71,8 @@ const styles = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#f0f0f0', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9,
   },
-  searchIcon: { fontSize: 14 },
   searchInput: { flex: 1, fontSize: 15, color: '#111' },
   composeBtn: { padding: 6 },
-  composeIcon: { fontSize: 22 },
   scroll: { flex: 1 },
   sectionTitle: {
     fontSize: 14, fontWeight: '700', color: '#111',

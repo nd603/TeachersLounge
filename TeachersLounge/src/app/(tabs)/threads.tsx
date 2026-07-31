@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { PostCard } from '@/components/PostCard';
 import { ReplyCard, type Reply, REPLY_LEFT_PAD, REPLY_AVATAR_SIZE } from '@/components/ReplyCard';
@@ -256,16 +257,16 @@ export default function ThreadsScreen() {
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Text style={styles.icon}>🔔</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/messages')}><Text style={styles.icon}>💬</Text></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
       <View style={styles.searchRow}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={16} color={TLColors.gray500} />
           <Text style={styles.searchText}>Search for posts...</Text>
         </View>
-        <TouchableOpacity style={styles.filterBtn}><Text style={styles.filterIcon}>⚙️</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.filterBtn}><Ionicons name="options-outline" size={22} color="#111" /></TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll} contentContainerStyle={styles.tabsContent}>
         {TABS.map(tab => (
@@ -369,7 +370,7 @@ export default function ThreadsScreen() {
         <Header />
         <ScrollView style={styles.feed}>
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPrompt(false); setReplyText(''); setReplyingToId(null); }}>
-            <Text style={styles.backText}>← Back</Text>
+            <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
           <View style={styles.promptCard}>
             <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
@@ -380,15 +381,15 @@ export default function ThreadsScreen() {
             <Text style={styles.promptQuestion}>{WEEKLY_PROMPT.text}</Text>
             <View style={styles.postActions}>
               <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Text style={styles.actionLabel}>···</Text>
+                <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn}><Ionicons name="bookmark-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn}><Ionicons name="heart-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => openReplyBox('post', WEEKLY_PROMPT_KEY)}>
-                <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+                <Ionicons name="arrow-undo-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Reply</Text>
               </TouchableOpacity>
             </View>
-            <OptionsSheet visible={promptMenuVisible} onClose={() => setPromptMenuVisible(false)} options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]} />
+            <OptionsSheet visible={promptMenuVisible} onClose={() => setPromptMenuVisible(false)} options={[{ label: 'Share', icon: 'share-outline' as const, onPress: () => {} }]} />
           </View>
           {renderInlineReplyBox('post', WEEKLY_PROMPT_KEY)}
           <View style={styles.divider} />
@@ -426,7 +427,7 @@ export default function ThreadsScreen() {
         <Header />
         <ScrollView style={styles.feed}>
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
-            <Text style={styles.backText}>← Back</Text>
+            <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
           <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} />
           {renderInlineReplyBox('post', viewingPost.id)}
@@ -491,18 +492,18 @@ export default function ThreadsScreen() {
           </TouchableOpacity>
           <View style={styles.postActions}>
             <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={styles.actionLabel}>···</Text>
+              <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Ionicons name="bookmark-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Ionicons name="heart-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
             <TouchableOpacity style={styles.actionBtn} onPress={() => setViewingPrompt(true)}>
-              <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+              <Ionicons name="arrow-undo-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Reply</Text>
             </TouchableOpacity>
           </View>
           <OptionsSheet
             visible={promptMenuVisible}
             onClose={() => setPromptMenuVisible(false)}
-            options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]}
+            options={[{ label: 'Share', icon: 'share-outline' as const, onPress: () => {} }]}
           />
         </View>
         <View style={styles.divider} />
@@ -581,7 +582,7 @@ const styles = StyleSheet.create({
   promptNoReplies: { fontSize: 13, color: TLColors.gray500, fontStyle: 'italic', marginBottom: 12 },
   postActions: { flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'flex-end' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionIcon: { fontSize: 16, color: '#888' },
+  actionIcon: {},
   actionLabel: { fontSize: 13, color: '#888' },
   divider: { height: 1, backgroundColor: '#f0f0f0' },
   noPostsContainer: { padding: 40, alignItems: 'center' },

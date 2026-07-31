@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { TLColors } from '@/constants/theme';
 import { Post } from '@/services/posts';
@@ -19,12 +20,12 @@ export function PostCard({
   const isOwner = !!currentUserId && currentUserId === post.author_id;
 
   const options = isOwner
-    ? [{ label: 'Delete post', icon: '🗑️', danger: true, onPress: () => onDelete?.() }]
+    ? [{ label: 'Delete post', icon: 'trash-outline' as const, danger: true, onPress: () => onDelete?.() }]
     : [
-        { label: 'Share', icon: '↗️', onPress: () => {} },
-        { label: 'Message', icon: '💬', onPress: () => {} },
-        { label: 'Block user', icon: '🚫', danger: true, onPress: () => {} },
-        { label: 'Report post', icon: '⚠️', danger: true, onPress: () => {} },
+        { label: 'Share', icon: 'share-outline' as const, onPress: () => {} },
+        { label: 'Message', icon: 'chatbubble-outline' as const, onPress: () => {} },
+        { label: 'Block user', icon: 'ban-outline' as const, danger: true, onPress: () => {} },
+        { label: 'Report post', icon: 'flag-outline' as const, danger: true, onPress: () => {} },
       ];
 
   return (
@@ -40,12 +41,19 @@ export function PostCard({
         <TouchableOpacity
           onPress={() => setMenuVisible(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.actionLabel}>···</Text>
+          <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>♡</Text><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn}>
+          <Ionicons name="bookmark-outline" size={16} color="#888" />
+          <Text style={styles.actionLabel}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionBtn}>
+          <Ionicons name="heart-outline" size={16} color="#888" />
+          <Text style={styles.actionLabel}>Like</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={onReply}>
-          <Text style={styles.actionIcon}>↪</Text><Text style={styles.actionLabel}>Reply</Text>
+          <Ionicons name="arrow-undo-outline" size={16} color="#888" />
+          <Text style={styles.actionLabel}>Reply</Text>
         </TouchableOpacity>
       </View>
       <OptionsSheet visible={menuVisible} onClose={() => setMenuVisible(false)} options={options} />
@@ -68,6 +76,5 @@ const styles = StyleSheet.create({
   postText: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 12 },
   postActions: { flexDirection: 'row', gap: 16, alignItems: 'center', justifyContent: 'flex-end' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionIcon: { fontSize: 16, color: '#888' },
   actionLabel: { fontSize: 13, color: '#888' },
 });

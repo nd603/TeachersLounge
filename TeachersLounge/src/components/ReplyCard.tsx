@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { OptionsSheet } from '@/components/OptionsSheet';
 
@@ -37,12 +38,12 @@ export function ReplyCard({
   const isOwner = !!currentUserId && currentUserId === reply.author_id;
 
   const options = isOwner
-    ? [{ label: 'Delete reply', icon: '🗑️', danger: true, onPress: () => onDelete?.() }]
+    ? [{ label: 'Delete reply', icon: 'trash-outline' as const, danger: true, onPress: () => onDelete?.() }]
     : [
-        { label: 'Share', icon: '↗️', onPress: () => {} },
-        { label: 'Message', icon: '💬', onPress: () => {} },
-        { label: 'Block user', icon: '🚫', danger: true, onPress: () => {} },
-        { label: 'Report reply', icon: '⚠️', danger: true, onPress: () => {} },
+        { label: 'Share', icon: 'share-outline' as const, onPress: () => {} },
+        { label: 'Message', icon: 'chatbubble-outline' as const, onPress: () => {} },
+        { label: 'Block user', icon: 'ban-outline' as const, danger: true, onPress: () => {} },
+        { label: 'Report reply', icon: 'flag-outline' as const, danger: true, onPress: () => {} },
       ];
 
   return (
@@ -63,11 +64,11 @@ export function ReplyCard({
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.actionLabel}>···</Text>
+            <Ionicons name="ellipsis-horizontal" size={16} color="#888" />
           </TouchableOpacity>
-          <TouchableOpacity><Text style={styles.actionIcon}>🔖</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.actionIcon}>♡</Text></TouchableOpacity>
-          <TouchableOpacity onPress={onReply}><Text style={styles.actionIcon}>↪</Text></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="bookmark-outline" size={16} color="#888" /></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="heart-outline" size={16} color="#888" /></TouchableOpacity>
+          <TouchableOpacity onPress={onReply}><Ionicons name="arrow-undo-outline" size={16} color="#888" /></TouchableOpacity>
         </View>
       </View>
       <OptionsSheet visible={menuVisible} onClose={() => setMenuVisible(false)} options={options} />
@@ -102,6 +103,4 @@ const styles = StyleSheet.create({
   date: { fontSize: 12, color: '#888' },
   text: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 8 },
   actions: { flexDirection: 'row', gap: 16, alignItems: 'center' },
-  actionLabel: { fontSize: 13, color: '#888' },
-  actionIcon: { fontSize: 16, color: '#888' },
 });
