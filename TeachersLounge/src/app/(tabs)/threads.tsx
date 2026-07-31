@@ -463,32 +463,34 @@ export default function ThreadsScreen() {
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
         {/* Weekly Community Prompt */}
-        <TouchableOpacity style={styles.promptCard} onPress={() => setViewingPrompt(true)} activeOpacity={0.85}>
-          <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
-          <View style={styles.promptMeta}>
-            <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
-            <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
-          </View>
-          <Text style={styles.promptQuestion}>
-            What is something you started integrating into your classroom this year that made your job easier?
-          </Text>
-          {/* Top 3 reply previews */}
-          {(replies[WEEKLY_PROMPT_KEY] ?? []).slice(0, 3).map(r => (
-            <View key={r.id} style={styles.promptReplyPreview}>
-              <View style={styles.promptReplyAvatar}>
-                <Text style={styles.promptReplyAvatarText}>{r.author[0]}</Text>
-              </View>
-              <View style={styles.promptReplyBody}>
-                <Text style={styles.promptReplyAuthor}>{r.author}</Text>
-                <Text style={styles.promptReplyText} numberOfLines={2}>{r.text}</Text>
-              </View>
+        <View style={styles.promptCard}>
+          <TouchableOpacity onPress={() => setViewingPrompt(true)} activeOpacity={0.85}>
+            <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
+            <View style={styles.promptMeta}>
+              <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
+              <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
             </View>
-          ))}
-          {(replies[WEEKLY_PROMPT_KEY] ?? []).length === 0 && (
-            <Text style={styles.promptNoReplies}>No responses yet — be the first!</Text>
-          )}
+            <Text style={styles.promptQuestion}>
+              What is something you started integrating into your classroom this year that made your job easier?
+            </Text>
+            {/* Top 3 reply previews */}
+            {(replies[WEEKLY_PROMPT_KEY] ?? []).slice(0, 3).map(r => (
+              <View key={r.id} style={styles.promptReplyPreview}>
+                <View style={styles.promptReplyAvatar}>
+                  <Text style={styles.promptReplyAvatarText}>{r.author[0]}</Text>
+                </View>
+                <View style={styles.promptReplyBody}>
+                  <Text style={styles.promptReplyAuthor}>{r.author}</Text>
+                  <Text style={styles.promptReplyText} numberOfLines={2}>{r.text}</Text>
+                </View>
+              </View>
+            ))}
+            {(replies[WEEKLY_PROMPT_KEY] ?? []).length === 0 && (
+              <Text style={styles.promptNoReplies}>No responses yet — be the first!</Text>
+            )}
+          </TouchableOpacity>
           <View style={styles.postActions}>
-            <TouchableOpacity onPress={e => { e.stopPropagation?.(); setPromptMenuVisible(true); }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Text style={styles.actionLabel}>···</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionBtn}><Text style={styles.actionIcon}>🔖</Text><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
@@ -502,7 +504,7 @@ export default function ThreadsScreen() {
             onClose={() => setPromptMenuVisible(false)}
             options={[{ label: 'Share', icon: '↗️', onPress: () => {} }]}
           />
-        </TouchableOpacity>
+        </View>
         <View style={styles.divider} />
 
         {loading ? (
