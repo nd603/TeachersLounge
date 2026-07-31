@@ -476,6 +476,31 @@ export default function ThreadsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
+        {/* Weekly Community Prompt */}
+        <View style={styles.promptCard}>
+          <TouchableOpacity onPress={() => { setPromptSource('threads'); setViewingPrompt(true); }} activeOpacity={0.85}>
+            <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
+            <View style={styles.promptMeta}>
+              <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
+              <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
+            </View>
+            <Text style={styles.promptQuestion}>
+              What is something you started integrating into your classroom this year that made your job easier?
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.postActions}>
+            <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}><Ionicons name="heart-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => { setPromptSource('threads'); setViewingPrompt(true); }}>
+              <Ionicons name="arrow-undo-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Reply</Text>
+            </TouchableOpacity>
+          </View>
+          <OptionsSheet visible={promptMenuVisible} onClose={() => setPromptMenuVisible(false)} options={[{ label: 'Share', icon: 'share-outline' as const, onPress: () => {} }]} />
+        </View>
+        <View style={styles.divider} />
+
         {loading ? (
           <View style={styles.noPostsContainer}>
             <Text style={styles.noPostsText}>Loading posts...</Text>
