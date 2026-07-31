@@ -38,7 +38,7 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLogo}>
-          <Image source={require('../../../assets/images/tl-logo.png')} style={styles.headerLogoImg} />
+          <Image source={require('@/assets/images/tl-logo.png')} style={styles.headerLogoImg} />
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
