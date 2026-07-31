@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { TLColors } from '@/constants/theme';
 import { useSavedResources, type Resource } from '@/context/SavedResourcesContext';
 import { fetchReplies } from '@/services/replies';
+import { getLikeCounts } from '@/services/likes';
 
 const WEEKLY_PROMPT_KEY = 'weekly-prompt';
 
@@ -28,8 +29,13 @@ export default function HomeScreen() {
   const [promptReplies, setPromptReplies] = useState<{ id: string; author: string; text: string }[]>([]);
 
   useEffect(() => {
-    fetchReplies(WEEKLY_PROMPT_KEY).then(({ data }) => {
-      if (data) setPromptReplies(data.filter((r: any) => !r.parent_reply_id).slice(0, 3));
+    fetchReplies(WEEKLY_PROMPT_KEY).then(async ({ data }) => {
+      if (!data) return;
+      const topLevel = data.filter((r: any) => !r.parent_reply_id);
+      const ids = topLevel.map((r: any) => String(r.id));
+      const counts = await getLikeCounts(ids, 'reply');
+      const sorted = [...topLevel].sort((a, b) => (counts[String(b.id)] ?? 0) - (counts[String(a.id)] ?? 0));
+      setPromptReplies(sorted.slice(0, 3));
     });
   }, []);
 

@@ -7,7 +7,7 @@ import { Post } from '@/services/posts';
 import { OptionsSheet } from '@/components/OptionsSheet';
 
 export function PostCard({
-  post, date, onPress, onReply, currentUserId, onDelete,
+  post, date, onPress, onReply, currentUserId, onDelete, liked, likeCount, onLike,
 }: {
   post: Post;
   date: string;
@@ -15,6 +15,9 @@ export function PostCard({
   onReply?: () => void;
   currentUserId?: string;
   onDelete?: () => void;
+  liked?: boolean;
+  likeCount?: number;
+  onLike?: () => void;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const isOwner = !!currentUserId && currentUserId === post.author_id;
@@ -47,9 +50,9 @@ export function PostCard({
           <Ionicons name="bookmark-outline" size={16} color="#888" />
           <Text style={styles.actionLabel}>Save</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
-          <Ionicons name="heart-outline" size={16} color="#888" />
-          <Text style={styles.actionLabel}>Like</Text>
+        <TouchableOpacity style={styles.actionBtn} onPress={onLike}>
+          <Ionicons name={liked ? 'heart' : 'heart-outline'} size={16} color={liked ? '#111' : '#888'} />
+          {likeCount ? <Text style={[styles.actionLabel, liked && { color: '#111' }]}>{likeCount}</Text> : null}
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={onReply}>
           <Ionicons name="arrow-undo-outline" size={16} color="#888" />

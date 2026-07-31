@@ -20,6 +20,7 @@ import { ReplyCard, type Reply, REPLY_LEFT_PAD, REPLY_AVATAR_SIZE } from '@/comp
 import { OptionsSheet } from '@/components/OptionsSheet';
 import { type Post, fetchPosts, createPost, deletePost } from '@/services/posts';
 import { fetchReplies, createReply } from '@/services/replies';
+import { toggleLike, getLikeCounts, getUserLikedIds } from '@/services/likes';
 import { supabase } from '@/lib/supabase';
 
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
@@ -42,7 +43,7 @@ const THREAD_LINE_TOP = 12 + REPLY_AVATAR_SIZE;
 const NESTED_AVATAR_CENTER_OFFSET = 12 + REPLY_AVATAR_SIZE / 2;
 
 function ReplyThreadGroup({
-  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles, currentUserId, onDeleteReply,
+  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles, currentUserId, onDeleteReply, likedIds, likeCounts, onLike,
 }: {
   reply: Reply;
   children: Reply[];
@@ -53,6 +54,9 @@ function ReplyThreadGroup({
   styles: Record<string, any>;
   currentUserId: string;
   onDeleteReply: (id: string) => void;
+  likedIds: Set<string>;
+  likeCounts: Record<string, number>;
+  onLike: (id: string, type: 'post' | 'reply') => void;
 }) {
   const groupRef = useRef<View>(null);
   const lastChildRef = useRef<View>(null);
@@ -87,6 +91,9 @@ function ReplyThreadGroup({
         showThreadLine={false}
         currentUserId={currentUserId}
         onDelete={() => onDeleteReply(reply.id)}
+        liked={likedIds.has(String(reply.id))}
+        likeCount={likeCounts[String(reply.id)]}
+        onLike={() => onLike(String(reply.id), 'reply')}
       />
       {renderInlineReplyBox('reply', reply.id)}
       {children.length > 0 && (
@@ -108,6 +115,9 @@ function ReplyThreadGroup({
                     nested
                     currentUserId={currentUserId}
                     onDelete={() => onDeleteReply(child.id)}
+                    liked={likedIds.has(String(child.id))}
+                    likeCount={likeCounts[String(child.id)]}
+                    onLike={() => onLike(String(child.id), 'reply')}
                   />
                 </View>
                 {renderInlineReplyBox('reply', child.id)}
@@ -140,6 +150,8 @@ export default function ThreadsScreen() {
   const [promptMenuVisible, setPromptMenuVisible] = useState(false);
   const [viewingPrompt, setViewingPrompt] = useState(false);
   const [promptSource, setPromptSource] = useState<'home' | 'threads'>('threads');
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
   useEffect(() => {
@@ -160,7 +172,16 @@ export default function ThreadsScreen() {
 
   const loadPromptReplies = async () => {
     const { data } = await fetchReplies(WEEKLY_PROMPT_KEY);
-    if (data) setReplies(prev => ({ ...prev, [WEEKLY_PROMPT_KEY]: data }));
+    if (data) {
+      setReplies(prev => ({ ...prev, [WEEKLY_PROMPT_KEY]: data }));
+      const ids = data.map((r: any) => String(r.id));
+      const [counts, liked] = await Promise.all([
+        getLikeCounts(ids, 'reply'),
+        currentUserId ? getUserLikedIds(currentUserId, ids, 'reply') : Promise.resolve(new Set<string>()),
+      ]);
+      setLikeCounts(prev => ({ ...prev, ...counts }));
+      setLikedIds(prev => new Set([...prev, ...liked]));
+    }
   };
 
   const handleDeletePost = async (postId: string) => {
@@ -173,8 +194,32 @@ export default function ThreadsScreen() {
   const loadPosts = async () => {
     setLoading(true);
     const { data } = await fetchPosts();
-    if (data) setPosts(data);
+    if (data) {
+      setPosts(data);
+      const ids = data.map((p: Post) => p.id);
+      const [counts, liked] = await Promise.all([
+        getLikeCounts(ids, 'post'),
+        currentUserId ? getUserLikedIds(currentUserId, ids, 'post') : Promise.resolve(new Set<string>()),
+      ]);
+      setLikeCounts(prev => ({ ...prev, ...counts }));
+      setLikedIds(prev => new Set([...prev, ...liked]));
+    }
     setLoading(false);
+  };
+
+  const handleLike = async (targetId: string, targetType: 'post' | 'reply') => {
+    if (!currentUserId) return;
+    const wasLiked = likedIds.has(targetId);
+    setLikedIds(prev => {
+      const next = new Set(prev);
+      wasLiked ? next.delete(targetId) : next.add(targetId);
+      return next;
+    });
+    setLikeCounts(prev => ({
+      ...prev,
+      [targetId]: Math.max(0, (prev[targetId] ?? 0) + (wasLiked ? -1 : 1)),
+    }));
+    await toggleLike(targetId, targetType, currentUserId);
   };
 
   const handlePost = async () => {
@@ -239,7 +284,16 @@ export default function ThreadsScreen() {
   const openPost = async (post: Post) => {
     setViewingPost(post);
     const { data } = await fetchReplies(post.id);
-    if (data) setReplies(prev => ({ ...prev, [post.id]: data }));
+    if (data) {
+      setReplies(prev => ({ ...prev, [post.id]: data }));
+      const ids = data.map((r: any) => String(r.id));
+      const [counts, liked] = await Promise.all([
+        getLikeCounts(ids, 'reply'),
+        currentUserId ? getUserLikedIds(currentUserId, ids, 'reply') : Promise.resolve(new Set<string>()),
+      ]);
+      setLikeCounts(prev => ({ ...prev, ...counts }));
+      setLikedIds(prev => new Set([...prev, ...liked]));
+    }
   };
 
   const openReplyBox = (type: 'post' | 'reply', id: string) => {
@@ -398,7 +452,10 @@ export default function ThreadsScreen() {
                 <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn}><Ionicons name="bookmark-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}><Ionicons name="heart-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(WEEKLY_PROMPT_KEY, 'post')}>
+                <Ionicons name={likedIds.has(WEEKLY_PROMPT_KEY) ? 'heart' : 'heart-outline'} size={16} color={likedIds.has(WEEKLY_PROMPT_KEY) ? '#111' : '#888'} />
+                {likeCounts[WEEKLY_PROMPT_KEY] ? <Text style={[styles.actionLabel, likedIds.has(WEEKLY_PROMPT_KEY) && { color: '#111' }]}>{likeCounts[WEEKLY_PROMPT_KEY]}</Text> : null}
+              </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn} onPress={() => openReplyBox('post', WEEKLY_PROMPT_KEY)}>
                 <Ionicons name="arrow-undo-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Reply</Text>
               </TouchableOpacity>
@@ -421,6 +478,9 @@ export default function ThreadsScreen() {
                 styles={styles}
                 currentUserId={currentUserId}
                 onDeleteReply={handleDeleteReply}
+                likedIds={likedIds}
+                likeCounts={likeCounts}
+                onLike={handleLike}
               />
             );
           })}
@@ -443,7 +503,7 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
             <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} liked={likedIds.has(viewingPost.id)} likeCount={likeCounts[viewingPost.id]} onLike={() => handleLike(viewingPost.id, 'post')} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
           {postReplies.filter(r => !r.parent_reply_id).map((reply, index) => {
@@ -460,6 +520,9 @@ export default function ThreadsScreen() {
                 styles={styles}
                 currentUserId={currentUserId}
                 onDeleteReply={handleDeleteReply}
+                likedIds={likedIds}
+                likeCounts={likeCounts}
+                onLike={handleLike}
               />
             );
           })}
@@ -513,7 +576,7 @@ export default function ThreadsScreen() {
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
             <View key={post.id}>
-              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} currentUserId={currentUserId} onDelete={() => handleDeletePost(post.id)} />
+              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} currentUserId={currentUserId} onDelete={() => handleDeletePost(post.id)} liked={likedIds.has(post.id)} likeCount={likeCounts[post.id]} onLike={() => handleLike(post.id, 'post')} />
               <View style={styles.divider} />
             </View>
           ))

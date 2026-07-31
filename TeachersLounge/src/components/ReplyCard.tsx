@@ -25,6 +25,9 @@ export function ReplyCard({
   nested,
   currentUserId,
   onDelete,
+  liked,
+  likeCount,
+  onLike,
 }: {
   reply: Reply;
   date: string;
@@ -33,6 +36,9 @@ export function ReplyCard({
   nested?: boolean;
   currentUserId?: string;
   onDelete?: () => void;
+  liked?: boolean;
+  likeCount?: number;
+  onLike?: () => void;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const isOwner = !!currentUserId && currentUserId === reply.author_id;
@@ -67,7 +73,10 @@ export function ReplyCard({
             <Ionicons name="ellipsis-horizontal" size={16} color="#888" />
           </TouchableOpacity>
           <TouchableOpacity><Ionicons name="bookmark-outline" size={16} color="#888" /></TouchableOpacity>
-          <TouchableOpacity><Ionicons name="heart-outline" size={16} color="#888" /></TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={onLike}>
+            <Ionicons name={liked ? 'heart' : 'heart-outline'} size={16} color={liked ? '#111' : '#888'} />
+            {likeCount ? <Text style={[styles.actionCount, liked && { color: '#111' }]}>{likeCount}</Text> : null}
+          </TouchableOpacity>
           <TouchableOpacity onPress={onReply}><Ionicons name="arrow-undo-outline" size={16} color="#888" /></TouchableOpacity>
         </View>
       </View>
@@ -103,4 +112,6 @@ const styles = StyleSheet.create({
   date: { fontSize: 12, color: '#888' },
   text: { fontSize: 14, color: '#222', lineHeight: 20, marginBottom: 8 },
   actions: { flexDirection: 'row', gap: 16, alignItems: 'center' },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  actionCount: { fontSize: 12, color: '#888' },
 });
