@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,6 +6,9 @@ import { useRouter } from 'expo-router';
 
 import { TLColors } from '@/constants/theme';
 import { useSavedResources, type Resource } from '@/context/SavedResourcesContext';
+import { fetchReplies } from '@/services/replies';
+
+const WEEKLY_PROMPT_KEY = 'weekly-prompt';
 
 const RESOURCES: Resource[] = [
   { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', icon: 'clipboard-outline', bg: '#dff0ee' },
@@ -21,6 +25,13 @@ const TEACHERS = [
 export default function HomeScreen() {
   const { toggleSave, isSaved } = useSavedResources();
   const router = useRouter();
+  const [promptReplies, setPromptReplies] = useState<{ id: string; author: string; text: string }[]>([]);
+
+  useEffect(() => {
+    fetchReplies(WEEKLY_PROMPT_KEY).then(({ data }) => {
+      if (data) setPromptReplies(data.filter((r: any) => !r.parent_reply_id).slice(0, 3));
+    });
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -63,9 +74,25 @@ export default function HomeScreen() {
           <Text style={styles.promptQuestion}>
             What is something you started integrating into your classroom this year that made your job easier?
           </Text>
-          <View style={styles.noComments}>
-            <Text style={styles.noCommentsText}>No responses yet — be the first to reply!</Text>
-          </View>
+          {promptReplies.length > 0 ? (
+            <View style={styles.promptPreviews}>
+              {promptReplies.map(r => (
+                <View key={r.id} style={styles.promptPreviewRow}>
+                  <View style={styles.promptPreviewAvatar}>
+                    <Text style={styles.promptPreviewAvatarText}>{r.author[0]}</Text>
+                  </View>
+                  <View style={styles.promptPreviewBody}>
+                    <Text style={styles.promptPreviewAuthor}>{r.author}</Text>
+                    <Text style={styles.promptPreviewText} numberOfLines={2}>{r.text}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.noComments}>
+              <Text style={styles.noCommentsText}>No responses yet — be the first to reply!</Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <View style={styles.divider} />
@@ -166,6 +193,16 @@ const styles = StyleSheet.create({
     borderRadius: 10, padding: 16, alignItems: 'center',
   },
   noCommentsText: { fontSize: 13, color: '#aaa', fontStyle: 'italic' },
+  promptPreviews: { gap: 8 },
+  promptPreviewRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  promptPreviewAvatar: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  promptPreviewAvatarText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  promptPreviewBody: { flex: 1, backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  promptPreviewAuthor: { fontSize: 12, fontWeight: '600', color: '#111', marginBottom: 2 },
+  promptPreviewText: { fontSize: 12, color: '#444', lineHeight: 16 },
   hScroll: { marginBottom: 16 },
   hScrollContent: { paddingHorizontal: 20, gap: 12 },
   resourceCard: { width: 150 },

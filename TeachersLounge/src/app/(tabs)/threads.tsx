@@ -138,6 +138,7 @@ export default function ThreadsScreen() {
   const [currentUserId, setCurrentUserId] = useState('');
   const [promptMenuVisible, setPromptMenuVisible] = useState(false);
   const [viewingPrompt, setViewingPrompt] = useState(false);
+  const [promptSource, setPromptSource] = useState<'home' | 'threads'>('threads');
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
 
@@ -150,7 +151,10 @@ export default function ThreadsScreen() {
   }, []);
 
   useEffect(() => {
-    if (openPrompt === 'true') setViewingPrompt(true);
+    if (openPrompt === 'true') {
+      setViewingPrompt(true);
+      setPromptSource('home');
+    }
   }, [openPrompt]);
 
   const loadPromptReplies = async () => {
@@ -374,7 +378,11 @@ export default function ThreadsScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header />
         <ScrollView style={styles.feed}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPrompt(false); setReplyText(''); setReplyingToId(null); }}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => {
+            setReplyText(''); setReplyingToId(null);
+            if (promptSource === 'home') { setViewingPrompt(false); router.push('/(tabs)/home'); }
+            else setViewingPrompt(false);
+          }}>
             <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
           <View style={styles.promptCard}>
@@ -468,51 +476,6 @@ export default function ThreadsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
-        {/* Weekly Community Prompt */}
-        <View style={styles.promptCard}>
-          <TouchableOpacity onPress={() => setViewingPrompt(true)} activeOpacity={0.85}>
-            <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
-            <View style={styles.promptMeta}>
-              <View style={styles.promptTag}><Text style={styles.promptTagText}>Class Management</Text></View>
-              <Text style={styles.promptDate}>Week of 3/1/26 – 3/9/26</Text>
-            </View>
-            <Text style={styles.promptQuestion}>
-              What is something you started integrating into your classroom this year that made your job easier?
-            </Text>
-            {/* Top 3 reply previews */}
-            {(replies[WEEKLY_PROMPT_KEY] ?? []).slice(0, 3).map(r => (
-              <View key={r.id} style={styles.promptReplyPreview}>
-                <View style={styles.promptReplyAvatar}>
-                  <Text style={styles.promptReplyAvatarText}>{r.author[0]}</Text>
-                </View>
-                <View style={styles.promptReplyBody}>
-                  <Text style={styles.promptReplyAuthor}>{r.author}</Text>
-                  <Text style={styles.promptReplyText} numberOfLines={2}>{r.text}</Text>
-                </View>
-              </View>
-            ))}
-            {(replies[WEEKLY_PROMPT_KEY] ?? []).length === 0 && (
-              <Text style={styles.promptNoReplies}>No responses yet — be the first!</Text>
-            )}
-          </TouchableOpacity>
-          <View style={styles.postActions}>
-            <TouchableOpacity onPress={() => setPromptMenuVisible(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="ellipsis-horizontal" size={18} color="#888" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}><Ionicons name="bookmark-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Save</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}><Ionicons name="heart-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => setViewingPrompt(true)}>
-              <Ionicons name="arrow-undo-outline" size={16} color="#888" /><Text style={styles.actionLabel}>Reply</Text>
-            </TouchableOpacity>
-          </View>
-          <OptionsSheet
-            visible={promptMenuVisible}
-            onClose={() => setPromptMenuVisible(false)}
-            options={[{ label: 'Share', icon: 'share-outline' as const, onPress: () => {} }]}
-          />
-        </View>
-        <View style={styles.divider} />
-
         {loading ? (
           <View style={styles.noPostsContainer}>
             <Text style={styles.noPostsText}>Loading posts...</Text>
