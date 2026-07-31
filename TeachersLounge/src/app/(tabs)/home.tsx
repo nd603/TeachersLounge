@@ -75,19 +75,19 @@ export default function HomeScreen() {
             What is something you started integrating into your classroom this year that made your job easier?
           </Text>
           {promptReplies.length > 0 ? (
-            <View style={styles.promptPreviews}>
-              {promptReplies.map(r => (
-                <View key={r.id} style={styles.promptPreviewRow}>
-                  <View style={styles.promptPreviewAvatar}>
-                    <Text style={styles.promptPreviewAvatarText}>{r.author[0]}</Text>
-                  </View>
-                  <View style={styles.promptPreviewBody}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.promptPreviewsScroll} contentContainerStyle={styles.promptPreviewsContent}>
+              {promptReplies.slice(0, 3).map(r => (
+                <View key={r.id} style={styles.promptPreviewCard}>
+                  <View style={styles.promptPreviewHeader}>
+                    <View style={styles.promptPreviewAvatar}>
+                      <Text style={styles.promptPreviewAvatarText}>{r.author[0]}</Text>
+                    </View>
                     <Text style={styles.promptPreviewAuthor}>{r.author}</Text>
-                    <Text style={styles.promptPreviewText} numberOfLines={2}>{r.text}</Text>
                   </View>
+                  <Text style={styles.promptPreviewText} numberOfLines={3}>{r.text}</Text>
                 </View>
               ))}
-            </View>
+            </ScrollView>
           ) : (
             <View style={styles.noComments}>
               <Text style={styles.noCommentsText}>No responses yet — be the first to reply!</Text>
@@ -193,16 +193,21 @@ const styles = StyleSheet.create({
     borderRadius: 10, padding: 16, alignItems: 'center',
   },
   noCommentsText: { fontSize: 13, color: '#aaa', fontStyle: 'italic' },
-  promptPreviews: { gap: 8 },
-  promptPreviewRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  promptPreviewsScroll: { marginTop: 10 },
+  promptPreviewsContent: { gap: 10, paddingRight: 4 },
+  promptPreviewCard: {
+    width: 160, borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 12,
+    padding: 12, backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+  },
+  promptPreviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   promptPreviewAvatar: {
-    width: 28, height: 28, borderRadius: 14,
+    width: 32, height: 32, borderRadius: 16,
     backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
   },
-  promptPreviewAvatarText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  promptPreviewBody: { flex: 1, backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
-  promptPreviewAuthor: { fontSize: 12, fontWeight: '600', color: '#111', marginBottom: 2 },
-  promptPreviewText: { fontSize: 12, color: '#444', lineHeight: 16 },
+  promptPreviewAvatarText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  promptPreviewAuthor: { fontSize: 13, fontWeight: '600', color: '#111', flex: 1 },
+  promptPreviewText: { fontSize: 12, color: '#555', lineHeight: 17 },
   hScroll: { marginBottom: 16 },
   hScrollContent: { paddingHorizontal: 20, gap: 12 },
   resourceCard: { width: 150 },
