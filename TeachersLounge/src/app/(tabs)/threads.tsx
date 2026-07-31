@@ -154,6 +154,7 @@ export default function ThreadsScreen() {
     if (openPrompt === 'true') {
       setViewingPrompt(true);
       setPromptSource('home');
+      router.setParams({ openPrompt: undefined });
     }
   }, [openPrompt]);
 
@@ -380,8 +381,8 @@ export default function ThreadsScreen() {
         <ScrollView style={styles.feed}>
           <TouchableOpacity style={styles.backBtn} onPress={() => {
             setReplyText(''); setReplyingToId(null);
-            if (promptSource === 'home') { setViewingPrompt(false); router.push('/(tabs)/home'); }
-            else setViewingPrompt(false);
+            setViewingPrompt(false);
+            if (promptSource === 'home') router.back();
           }}>
             <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
