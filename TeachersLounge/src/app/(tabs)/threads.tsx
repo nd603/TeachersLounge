@@ -141,6 +141,7 @@ export default function ThreadsScreen() {
   const [promptSource, setPromptSource] = useState<'home' | 'threads'>('threads');
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     loadPosts();
@@ -148,6 +149,7 @@ export default function ThreadsScreen() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setCurrentUserId(user.id);
     });
+    mountedRef.current = true;
   }, []);
 
   useEffect(() => {
@@ -156,6 +158,11 @@ export default function ThreadsScreen() {
       setPromptSource('home');
     }
   }, [openPrompt]);
+
+  useEffect(() => {
+    if (!mountedRef.current) return;
+    router.setParams({ openPrompt: viewingPrompt ? 'true' : undefined });
+  }, [viewingPrompt]);
 
   const loadPromptReplies = async () => {
     const { data } = await fetchReplies(WEEKLY_PROMPT_KEY);
@@ -477,7 +484,7 @@ export default function ThreadsScreen() {
       <Header />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.feed}>
         {/* Weekly Community Prompt */}
-        <View style={styles.promptCard}>
+        <View style={[styles.promptCard, { marginTop: 12 }]}>
           <TouchableOpacity onPress={() => { setPromptSource('threads'); setViewingPrompt(true); }} activeOpacity={0.85}>
             <Text style={styles.promptTitle}>Weekly Community Prompt</Text>
             <View style={styles.promptMeta}>
