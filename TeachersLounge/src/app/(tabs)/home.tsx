@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 import { TLColors } from '@/constants/theme';
 import { useSavedResources, type Resource } from '@/context/SavedResourcesContext';
@@ -19,6 +20,7 @@ const TEACHERS = [
 
 export default function HomeScreen() {
   const { toggleSave, isSaved } = useSavedResources();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -49,7 +51,7 @@ export default function HomeScreen() {
         <View style={styles.divider} />
 
         {/* Weekly Community Prompt */}
-        <View style={styles.section}>
+        <TouchableOpacity style={styles.section} onPress={() => router.push('/(tabs)/threads?openPrompt=true')} activeOpacity={0.8}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Weekly Community Prompt</Text>
             <Text style={styles.arrow}>›</Text>
@@ -64,7 +66,7 @@ export default function HomeScreen() {
           <View style={styles.noComments}>
             <Text style={styles.noCommentsText}>No responses yet — be the first to reply!</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.divider} />
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   Modal,
   Pressable,
@@ -121,6 +121,7 @@ function ReplyThreadGroup({
 
 export default function ThreadsScreen() {
   const router = useRouter();
+  const { openPrompt } = useLocalSearchParams<{ openPrompt?: string }>();
   const [activeTab, setActiveTab] = useState('My Feed');
   const [createVisible, setCreateVisible] = useState(false);
   const [postText, setPostText] = useState('');
@@ -147,6 +148,10 @@ export default function ThreadsScreen() {
       if (user) setCurrentUserId(user.id);
     });
   }, []);
+
+  useEffect(() => {
+    if (openPrompt === 'true') setViewingPrompt(true);
+  }, [openPrompt]);
 
   const loadPromptReplies = async () => {
     const { data } = await fetchReplies(WEEKLY_PROMPT_KEY);
