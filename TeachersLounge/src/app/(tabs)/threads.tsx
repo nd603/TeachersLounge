@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   tabUnderline: { height: 2, backgroundColor: TLColors.danger, width: '100%', marginTop: 4, borderRadius: 1 },
   tabDivider: { height: 1, backgroundColor: '#f0f0f0' },
   feed: { flex: 1 },
-  backBtn: { paddingHorizontal: 20, paddingVertical: 14 },
+  backBtn: { paddingHorizontal: 20, paddingVertical: 8 },
   backText: { fontSize: 16, color: TLColors.black, fontWeight: '500' },
   promptCard: { padding: 20 },
   promptTitle: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 10 },
