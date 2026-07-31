@@ -16,7 +16,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: TLColors.primary,
         tabBarInactiveTintColor: '#aaa',
-        tabBarStyle: { borderTopColor: '#f0f0f0' },
+        tabBarStyle: { borderTopColor: '#f0f0f0', paddingTop: 8, paddingBottom: 8, height: 64 },
       }}>
       <Tabs.Screen
         name="home"
