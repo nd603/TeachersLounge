@@ -1,10 +1,12 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { TLColors } from '@/constants/theme';
 
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>;
+type IoniconsName = keyof typeof Ionicons.glyphMap;
+
+function TabIcon({ name, focused }: { name: IoniconsName; focused: boolean }) {
+  return <Ionicons name={name} size={24} color={focused ? TLColors.primary : '#aaa'} />;
 }
 
 export default function TabsLayout() {
@@ -20,35 +22,35 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="home-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="threads"
         options={{
           title: 'Threads',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="💬" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="chatbubbles-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="discover"
         options={{
           title: 'Discover',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🔍" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="compass-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="library"
         options={{
           title: 'Library',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🔖" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="library-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="person-outline" focused={focused} />,
         }}
       />
     </Tabs>

@@ -1,12 +1,13 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import { TLColors } from '@/constants/theme';
 
 const RESOURCES = [
-  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', emoji: '📋', bg: '#dff0ee' },
-  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: '$9.00', creator: 'Eloise_D', emoji: '📖', bg: '#f0eaff' },
-  { id: '3', title: 'Math Morning Work — Grade 7', price: '$4.50', creator: 'A. Miller', emoji: '✏️', bg: '#fff3e0' },
+  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', icon: 'clipboard-outline' as const, bg: '#dff0ee' },
+  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: '$9.00', creator: 'Eloise_D', icon: 'book-outline' as const, bg: '#f0eaff' },
+  { id: '3', title: 'Math Morning Work — Grade 7', price: '$4.50', creator: 'A. Miller', icon: 'pencil-outline' as const, bg: '#fff3e0' },
 ];
 
 const TEACHERS = [
@@ -25,15 +26,15 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Text style={styles.icon}>🔔</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.icon}>💬</Text></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <TouchableOpacity><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Search */}
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search-outline" size={16} color="#999" />
           <Text style={styles.searchText}>Search across Teachers' Lounge</Text>
         </View>
 
@@ -75,8 +76,10 @@ export default function HomeScreen() {
           {RESOURCES.map(r => (
             <TouchableOpacity key={r.id} style={styles.resourceCard}>
               <View style={[styles.resourceImg, { backgroundColor: r.bg }]}>
-                <Text style={styles.resourceEmoji}>{r.emoji}</Text>
-                <View style={styles.bookmark}><Text>🔖</Text></View>
+                <Ionicons name={r.icon} size={36} color="#555" />
+                <View style={styles.bookmark}>
+                  <Ionicons name="bookmark-outline" size={16} color="#555" />
+                </View>
               </View>
               <Text style={styles.resourcePrice}>{r.price}</Text>
               <Text style={styles.resourceTitle} numberOfLines={2}>{r.title}</Text>
@@ -126,13 +129,11 @@ const styles = StyleSheet.create({
   headerEmoji: { fontSize: 30 },
   headerTitle: { fontSize: 16, fontWeight: '700', color: TLColors.primary, lineHeight: 18 },
   headerIcons: { flexDirection: 'row', gap: 16 },
-  icon: { fontSize: 22 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#f5f5f5', borderRadius: 10,
     marginHorizontal: 20, marginVertical: 12, padding: 10,
   },
-  searchIcon: { fontSize: 16 },
   searchText: { fontSize: 14, color: '#999' },
   section: { paddingHorizontal: 20, marginBottom: 12 },
   noActive: { fontSize: 13, color: '#aaa', fontStyle: 'italic', paddingVertical: 8 },
@@ -157,7 +158,6 @@ const styles = StyleSheet.create({
     width: 150, height: 110, borderRadius: 10,
     marginBottom: 6, alignItems: 'center', justifyContent: 'center',
   },
-  resourceEmoji: { fontSize: 32 },
   bookmark: {
     position: 'absolute', top: 8, right: 8,
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 6,
