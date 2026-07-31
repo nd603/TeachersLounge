@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -141,15 +142,12 @@ export default function ThreadsScreen() {
   const [promptSource, setPromptSource] = useState<'home' | 'threads'>('threads');
   const replyInputRef = useRef<TextInput>(null);
   const replyTextRef = useRef('');
-  const mountedRef = useRef(false);
-
   useEffect(() => {
     loadPosts();
     loadPromptReplies();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setCurrentUserId(user.id);
     });
-    mountedRef.current = true;
   }, []);
 
   useEffect(() => {
@@ -159,10 +157,6 @@ export default function ThreadsScreen() {
     }
   }, [openPrompt]);
 
-  useEffect(() => {
-    if (!mountedRef.current) return;
-    router.setParams({ openPrompt: viewingPrompt ? 'true' : undefined });
-  }, [viewingPrompt]);
 
   const loadPromptReplies = async () => {
     const { data } = await fetchReplies(WEEKLY_PROMPT_KEY);
@@ -269,7 +263,7 @@ export default function ThreadsScreen() {
     <>
       <View style={styles.header}>
         <View style={styles.headerLogo}>
-          <Text style={styles.headerEmoji}>☕</Text>
+          <Image source={require('../../../../assets/images/tl-logo.png')} style={styles.headerLogoImg} />
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
@@ -543,7 +537,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
   },
   headerLogo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerEmoji: { fontSize: 30 },
+  headerLogoImg: { width: 44, height: 44, resizeMode: 'contain' },
   headerTitle: { fontSize: 16, fontWeight: '700', color: TLColors.primary, lineHeight: 18 },
   headerIcons: { flexDirection: 'row', gap: 16 },
   icon: { fontSize: 22 },
