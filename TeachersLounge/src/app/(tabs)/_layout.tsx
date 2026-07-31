@@ -29,7 +29,7 @@ export default function TabsLayout() {
         name="threads"
         options={{
           title: 'Threads',
-          tabBarIcon: ({ focused }) => <TabIcon name="chatbubbles-outline" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="reader-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen
