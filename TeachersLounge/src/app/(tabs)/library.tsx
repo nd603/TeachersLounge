@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,7 @@ const BOARDS = [
 const FILTERS: Filter[] = ['All Resources', 'Lesson Plans', 'Activities'];
 
 export default function LibraryScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('Saved');
   const [activeFilter, setActiveFilter] = useState<Filter>('All Resources');
   const [search, setSearch] = useState('');
@@ -35,7 +37,7 @@ export default function LibraryScreen() {
         <Text style={styles.headerTitle}>Library</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
-          <TouchableOpacity><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
 
