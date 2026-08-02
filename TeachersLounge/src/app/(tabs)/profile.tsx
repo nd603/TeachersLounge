@@ -42,10 +42,16 @@ export default function ProfileScreen() {
   const [draftBio, setDraftBio] = useState('');
   const [savingBio, setSavingBio] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [editNameVisible, setEditNameVisible] = useState(false);
+  const [draftFirstName, setDraftFirstName] = useState('');
+  const [draftLastName, setDraftLastName] = useState('');
+  const [draftUsername, setDraftUsername] = useState('');
+  const [savingName, setSavingName] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('Posts');
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [userId, setUserId] = useState('');
+  const [customUsername, setCustomUsername] = useState('');
 
   const bioRef = useRef<TextInput>(null);
 
@@ -59,6 +65,7 @@ export default function ProfileScreen() {
       setFirstName(meta.first_name ?? '');
       setLastName(meta.last_name ?? '');
       setBio(meta.bio ?? '');
+      setCustomUsername(meta.username ?? '');
       setLoading(false);
     })();
   }, []);
@@ -88,13 +95,32 @@ export default function ProfileScreen() {
     setSavingBio(false);
   };
 
+  const openEditName = () => {
+    setDraftFirstName(firstName);
+    setDraftLastName(lastName);
+    setDraftUsername(customUsername || (firstName ? `${firstName.toLowerCase()}_teacher` : ''));
+    setEditNameVisible(true);
+  };
+
+  const saveNameAndUsername = async () => {
+    setSavingName(true);
+    await supabase.auth.updateUser({
+      data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
+    });
+    setFirstName(draftFirstName);
+    setLastName(draftLastName);
+    setCustomUsername(draftUsername);
+    setSavingName(false);
+    setEditNameVisible(false);
+  };
+
   const handleSignOut = async () => {
     await signOut();
     router.replace('/');
   };
 
   const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase() || '?';
-  const username = firstName ? `@${firstName.toLowerCase()}_teacher` : '';
+  const username = customUsername ? `@${customUsername}` : firstName ? `@${firstName.toLowerCase()}_teacher` : '';
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Your Name';
 
   if (loading) {
@@ -136,7 +162,12 @@ export default function ProfileScreen() {
 
       {/* Name & username */}
       <View style={styles.nameSection}>
-        <Text style={styles.fullName}>{fullName}</Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.fullName}>{fullName}</Text>
+          <TouchableOpacity onPress={openEditName} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="pencil-outline" size={18} color={TLColors.gray500} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.username}>{username}</Text>
       </View>
 
@@ -232,6 +263,51 @@ export default function ProfileScreen() {
         </Pressable>
       </Modal>
 
+      {/* Edit name/username modal */}
+      <Modal visible={editNameVisible} transparent animationType="fade" onRequestClose={() => setEditNameVisible(false)}>
+        <Pressable style={styles.editNameOverlay} onPress={() => setEditNameVisible(false)}>
+          <Pressable style={styles.editNameSheet} onPress={() => {}}>
+            <Text style={styles.editNameTitle}>Edit Profile</Text>
+            <Text style={styles.editNameLabel}>First Name</Text>
+            <TextInput
+              style={styles.editNameInput}
+              value={draftFirstName}
+              onChangeText={setDraftFirstName}
+              placeholder="First name"
+              placeholderTextColor={TLColors.gray500}
+            />
+            <Text style={styles.editNameLabel}>Last Name</Text>
+            <TextInput
+              style={styles.editNameInput}
+              value={draftLastName}
+              onChangeText={setDraftLastName}
+              placeholder="Last name"
+              placeholderTextColor={TLColors.gray500}
+            />
+            <Text style={styles.editNameLabel}>Username</Text>
+            <View style={styles.editNameUsernameRow}>
+              <Text style={styles.editNameAt}>@</Text>
+              <TextInput
+                style={[styles.editNameInput, { flex: 1, marginBottom: 0 }]}
+                value={draftUsername}
+                onChangeText={setDraftUsername}
+                placeholder="username"
+                placeholderTextColor={TLColors.gray500}
+                autoCapitalize="none"
+              />
+            </View>
+            <View style={styles.editNameActions}>
+              <TouchableOpacity onPress={() => setEditNameVisible(false)} style={styles.editNameCancel}>
+                <Text style={styles.editNameCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={saveNameAndUsername} style={styles.editNameSave} disabled={savingName}>
+                <Text style={styles.editNameSaveText}>{savingName ? 'Saving…' : 'Save'}</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <FlatList
         data={activeTab === 'Posts' ? posts : []}
         keyExtractor={p => p.id}
@@ -273,8 +349,26 @@ const styles = StyleSheet.create({
 
   // Name
   nameSection: { paddingHorizontal: 20, marginTop: 10 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   fullName: { fontSize: 20, fontWeight: '700', color: '#111' },
   username: { fontSize: 14, color: TLColors.gray500, marginTop: 2 },
+
+  // Edit name modal
+  editNameOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', paddingHorizontal: 24 },
+  editNameSheet: { backgroundColor: '#fff', borderRadius: 16, padding: 24 },
+  editNameTitle: { fontSize: 17, fontWeight: '700', color: '#111', marginBottom: 20 },
+  editNameLabel: { fontSize: 13, fontWeight: '600', color: '#555', marginBottom: 6 },
+  editNameInput: {
+    borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: '#111', marginBottom: 16,
+  },
+  editNameUsernameRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10, paddingLeft: 12, marginBottom: 24 },
+  editNameAt: { fontSize: 15, color: '#555', marginRight: 2 },
+  editNameActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+  editNameCancel: { paddingHorizontal: 16, paddingVertical: 10 },
+  editNameCancelText: { fontSize: 15, color: TLColors.gray500 },
+  editNameSave: { backgroundColor: TLColors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  editNameSaveText: { fontSize: 15, color: '#fff', fontWeight: '600' },
 
   // Tags
   tagsScroll: { marginTop: 12 },
