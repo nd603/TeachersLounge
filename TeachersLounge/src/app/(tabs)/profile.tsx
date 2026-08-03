@@ -78,9 +78,16 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (!userId || (!firstName && !lastName)) return;
     const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Teacher';
-    supabase.from('posts').update({ author: displayName }).eq('author_id', userId).filter('anonymous', 'not.is', true);
-    supabase.from('replies').update({ author: displayName }).eq('author_id', userId);
-  }, [userId]);
+    (async () => {
+      // Update by author_id (normal path) and by old name as fallback for legacy rows
+      await Promise.all([
+        supabase.from('posts').update({ author: displayName, author_id: userId }).eq('author_id', userId),
+        supabase.from('posts').update({ author: displayName, author_id: userId }).eq('author', 'First'),
+        supabase.from('replies').update({ author: displayName, author_id: userId }).eq('author_id', userId),
+        supabase.from('replies').update({ author: displayName, author_id: userId }).eq('author', 'First'),
+      ]);
+    })();
+  }, [userId, firstName, lastName]);
 
   const loadPosts = async () => {
     setPostsLoading(true);
@@ -117,7 +124,7 @@ export default function ProfileScreen() {
       supabase.auth.updateUser({
         data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
       }),
-      supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId).filter('anonymous', 'not.is', true),
+      supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId),
       supabase.from('replies').update({ author: newDisplayName }).eq('author_id', userId),
     ]);
     setFirstName(draftFirstName);
