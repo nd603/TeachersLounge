@@ -75,6 +75,13 @@ export default function ProfileScreen() {
     if (activeTab === 'Posts' && userId) loadPosts();
   }, [activeTab, userId]);
 
+  useEffect(() => {
+    if (!userId || (!firstName && !lastName)) return;
+    const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Teacher';
+    supabase.from('posts').update({ author: displayName }).eq('author_id', userId).filter('anonymous', 'not.is', true);
+    supabase.from('replies').update({ author: displayName }).eq('author_id', userId);
+  }, [userId]);
+
   const loadPosts = async () => {
     setPostsLoading(true);
     const { data } = await fetchPosts();
@@ -110,7 +117,7 @@ export default function ProfileScreen() {
       supabase.auth.updateUser({
         data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
       }),
-      supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId).neq('anonymous', true),
+      supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId).filter('anonymous', 'not.is', true),
       supabase.from('replies').update({ author: newDisplayName }).eq('author_id', userId),
     ]);
     setFirstName(draftFirstName);
