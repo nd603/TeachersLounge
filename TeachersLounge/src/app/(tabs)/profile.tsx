@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -134,13 +135,7 @@ export default function ProfileScreen() {
   const renderHeader = () => (
     <View>
       {/* Banner */}
-      <View style={styles.banner}>
-        {BANNER_EMOJIS.map((emoji, i) => (
-          <Text key={i} style={[styles.bannerEmoji, BANNER_POSITIONS[i]]}>
-            {emoji}
-          </Text>
-        ))}
-      </View>
+      <Image source={require('@/assets/images/profile-banner.png')} style={styles.banner} />
 
       {/* Avatar + stats row */}
       <View style={styles.avatarRow}>
@@ -325,8 +320,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
 
   // Banner
-  banner: { height: 100, backgroundColor: '#d4eef0', overflow: 'hidden', position: 'relative' },
-  bannerEmoji: { position: 'absolute', fontSize: 22 },
+  banner: { width: '100%', height: 100, resizeMode: 'cover' },
 
   // Avatar + stats
   avatarRow: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, marginTop: -36 },
