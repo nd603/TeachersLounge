@@ -12,9 +12,9 @@ import { getLikeCounts } from '@/services/likes';
 const WEEKLY_PROMPT_KEY = 'weekly-prompt';
 
 const RESOURCES: Resource[] = [
-  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: 'One Stop Teacher', icon: 'clipboard-outline', bg: '#dff0ee' },
-  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: '$9.00', creator: 'Eloise_D', icon: 'book-outline', bg: '#f0eaff' },
-  { id: '3', title: 'Math Morning Work — Grade 7', price: '$4.50', creator: 'A. Miller', icon: 'pencil-outline', bg: '#fff3e0' },
+  { id: '1', title: 'Daily Reading Bell Ringers', price: 'FREE', creator: "Teachers' Lounge", icon: 'clipboard-outline', bg: '#dff0ee' },
+  { id: '2', title: 'Prefixes & Suffixes Worksheets Greek…', price: 'FREE', creator: "Teachers' Lounge", icon: 'book-outline', bg: '#f0eaff' },
+  { id: '3', title: 'Math Morning Work — Grade 7', price: 'FREE', creator: "Teachers' Lounge", icon: 'pencil-outline', bg: '#fff3e0' },
 ];
 
 const TEACHERS = [

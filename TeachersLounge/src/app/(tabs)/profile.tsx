@@ -105,9 +105,14 @@ export default function ProfileScreen() {
 
   const saveNameAndUsername = async () => {
     setSavingName(true);
-    await supabase.auth.updateUser({
-      data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
-    });
+    const newDisplayName = [draftFirstName, draftLastName].filter(Boolean).join(' ') || 'Teacher';
+    await Promise.all([
+      supabase.auth.updateUser({
+        data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
+      }),
+      supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId).neq('anonymous', true),
+      supabase.from('replies').update({ author: newDisplayName }).eq('author_id', userId),
+    ]);
     setFirstName(draftFirstName);
     setLastName(draftLastName);
     setCustomUsername(draftUsername);
