@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Switch,
@@ -241,9 +242,7 @@ export default function SignupScreen() {
         {step === 6 && (
           <View style={styles.welcomeContainer}>
             <Text style={styles.welcomeTitle}>Welcome!</Text>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoEmoji}>☕</Text>
-            </View>
+            <Image source={require('@/assets/images/tl-logo.png')} style={styles.welcomeLogo} />
           </View>
         )}
 
@@ -359,11 +358,7 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: 12, color: TLColors.gray500, marginBottom: 8 },
   welcomeContainer: { alignItems: 'center', paddingTop: 60 },
   welcomeTitle: { fontSize: 32, fontWeight: '700', marginBottom: 32, color: TLColors.black },
-  logoCircle: {
-    width: 140, height: 140, borderRadius: 70,
-    backgroundColor: TLColors.gray100, alignItems: 'center', justifyContent: 'center',
-  },
-  logoEmoji: { fontSize: 64 },
+  welcomeLogo: { width: 140, height: 140, resizeMode: 'contain' },
   footer: { paddingHorizontal: 24, paddingBottom: 16, paddingTop: 8 },
   btnNext: {
     backgroundColor: TLColors.primary, borderRadius: 50,

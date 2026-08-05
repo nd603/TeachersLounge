@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
@@ -32,6 +32,7 @@ export default function LoginScreen() {
         <Text style={styles.backText}>←</Text>
       </TouchableOpacity>
 
+      <Image source={require('@/assets/images/tl-logo.png')} style={styles.logoImg} />
       <Text style={styles.title}>Log In</Text>
 
       <View style={styles.form}>
@@ -68,6 +69,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: TLColors.white, paddingHorizontal: 24 },
+  logoImg: { width: 80, height: 80, resizeMode: 'contain', alignSelf: 'center', marginBottom: 16 },
   back: { marginTop: 8, marginBottom: 24 },
   backText: { fontSize: 24, color: TLColors.black },
   title: { fontSize: 26, fontWeight: '700', color: TLColors.black, marginBottom: 32 },

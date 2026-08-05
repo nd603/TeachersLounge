@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TLColors } from '@/constants/theme';
@@ -10,9 +10,7 @@ export default function LandingScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.logoArea}>
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoEmoji}>☕</Text>
-        </View>
+        <Image source={require('@/assets/images/tl-logo.png')} style={styles.logoImg} />
         <Text style={styles.appName}>{"Teachers'\nLounge"}</Text>
       </View>
 
@@ -40,17 +38,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 60,
   },
-  logoCircle: {
+  logoImg: {
     width: 120,
     height: 120,
-    borderRadius: 60,
-    backgroundColor: TLColors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    resizeMode: 'contain',
     marginBottom: 16,
-  },
-  logoEmoji: {
-    fontSize: 56,
   },
   appName: {
     fontSize: 40,
