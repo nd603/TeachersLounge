@@ -28,6 +28,7 @@ export function ReplyCard({
   liked,
   likeCount,
   onLike,
+  onAuthorPress,
 }: {
   reply: Reply;
   date: string;
@@ -39,6 +40,7 @@ export function ReplyCard({
   liked?: boolean;
   likeCount?: number;
   onLike?: () => void;
+  onAuthorPress?: () => void;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const isOwner = !!currentUserId && currentUserId === reply.author_id;
@@ -54,15 +56,17 @@ export function ReplyCard({
 
   return (
     <View style={[styles.card, showThreadLine && styles.cardNoBottomPad, nested && styles.cardNested]}>
-      <View style={styles.leftCol}>
+      <TouchableOpacity style={styles.leftCol} onPress={onAuthorPress} disabled={!onAuthorPress} activeOpacity={0.7}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{reply.author[0]}</Text>
         </View>
         {showThreadLine && <View style={styles.threadLine} />}
-      </View>
+      </TouchableOpacity>
       <View style={styles.rightCol}>
         <View style={styles.header}>
-          <Text style={styles.author}>{reply.author}</Text>
+          <TouchableOpacity onPress={onAuthorPress} disabled={!onAuthorPress}>
+            <Text style={styles.author}>{reply.author}</Text>
+          </TouchableOpacity>
           <Text style={styles.date}>{date}</Text>
         </View>
         <Text style={styles.text}>{reply.text}</Text>

@@ -43,7 +43,7 @@ const THREAD_LINE_TOP = 12 + REPLY_AVATAR_SIZE;
 const NESTED_AVATAR_CENTER_OFFSET = 12 + REPLY_AVATAR_SIZE / 2;
 
 function ReplyThreadGroup({
-  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles, currentUserId, onDeleteReply, likedIds, likeCounts, onLike,
+  reply, children, index, formatDate, openReplyBox, renderInlineReplyBox, styles, currentUserId, onDeleteReply, likedIds, likeCounts, onLike, onAuthorPress,
 }: {
   reply: Reply;
   children: Reply[];
@@ -57,6 +57,7 @@ function ReplyThreadGroup({
   likedIds: Set<string>;
   likeCounts: Record<string, number>;
   onLike: (id: string, type: 'post' | 'reply') => void;
+  onAuthorPress: (authorId: string) => void;
 }) {
   const groupRef = useRef<View>(null);
   const lastChildRef = useRef<View>(null);
@@ -94,6 +95,7 @@ function ReplyThreadGroup({
         liked={likedIds.has(String(reply.id))}
         likeCount={likeCounts[String(reply.id)]}
         onLike={() => onLike(String(reply.id), 'reply')}
+        onAuthorPress={reply.author_id !== currentUserId ? () => onAuthorPress(reply.author_id) : undefined}
       />
       {renderInlineReplyBox('reply', reply.id)}
       {children.length > 0 && (
@@ -118,6 +120,7 @@ function ReplyThreadGroup({
                     liked={likedIds.has(String(child.id))}
                     likeCount={likeCounts[String(child.id)]}
                     onLike={() => onLike(String(child.id), 'reply')}
+                    onAuthorPress={child.author_id !== currentUserId ? () => onAuthorPress(child.author_id) : undefined}
                   />
                 </View>
                 {renderInlineReplyBox('reply', child.id)}
@@ -481,6 +484,7 @@ export default function ThreadsScreen() {
                 likedIds={likedIds}
                 likeCounts={likeCounts}
                 onLike={handleLike}
+                onAuthorPress={(authorId) => router.push(`/user/${authorId}`)}
               />
             );
           })}
@@ -503,7 +507,7 @@ export default function ThreadsScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => { setViewingPost(null); setReplyText(''); setReplyingToId(null); }}>
             <Ionicons name="arrow-back" size={22} color="#111" />
           </TouchableOpacity>
-          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} liked={likedIds.has(viewingPost.id)} likeCount={likeCounts[viewingPost.id]} onLike={() => handleLike(viewingPost.id, 'post')} />
+          <PostCard post={viewingPost} date={formatDate(viewingPost.created_at)} onReply={() => openReplyBox('post', viewingPost.id)} currentUserId={currentUserId} onDelete={() => handleDeletePost(viewingPost.id)} liked={likedIds.has(viewingPost.id)} likeCount={likeCounts[viewingPost.id]} onLike={() => handleLike(viewingPost.id, 'post')} onAuthorPress={viewingPost.author_id !== currentUserId ? () => router.push(`/user/${viewingPost.author_id}`) : undefined} />
           {renderInlineReplyBox('post', viewingPost.id)}
           <View style={styles.divider} />
           {postReplies.filter(r => !r.parent_reply_id).map((reply, index) => {
@@ -523,6 +527,7 @@ export default function ThreadsScreen() {
                 likedIds={likedIds}
                 likeCounts={likeCounts}
                 onLike={handleLike}
+                onAuthorPress={(authorId) => router.push(`/user/${authorId}`)}
               />
             );
           })}
@@ -576,7 +581,7 @@ export default function ThreadsScreen() {
         ) : filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
             <View key={post.id}>
-              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} currentUserId={currentUserId} onDelete={() => handleDeletePost(post.id)} liked={likedIds.has(post.id)} likeCount={likeCounts[post.id]} onLike={() => handleLike(post.id, 'post')} />
+              <PostCard post={post} date={formatDate(post.created_at)} onPress={() => openPost(post)} currentUserId={currentUserId} onDelete={() => handleDeletePost(post.id)} liked={likedIds.has(post.id)} likeCount={likeCounts[post.id]} onLike={() => handleLike(post.id, 'post')} onAuthorPress={post.author_id !== currentUserId ? () => router.push(`/user/${post.author_id}`) : undefined} />
               <View style={styles.divider} />
             </View>
           ))

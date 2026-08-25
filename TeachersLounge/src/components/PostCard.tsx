@@ -7,7 +7,7 @@ import { Post } from '@/services/posts';
 import { OptionsSheet } from '@/components/OptionsSheet';
 
 export function PostCard({
-  post, date, onPress, onReply, currentUserId, onDelete, liked, likeCount, onLike,
+  post, date, onPress, onReply, currentUserId, onDelete, liked, likeCount, onLike, onAuthorPress,
 }: {
   post: Post;
   date: string;
@@ -18,6 +18,7 @@ export function PostCard({
   liked?: boolean;
   likeCount?: number;
   onLike?: () => void;
+  onAuthorPress?: () => void;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const isOwner = !!currentUserId && currentUserId === post.author_id;
@@ -34,8 +35,10 @@ export function PostCard({
   return (
     <TouchableOpacity style={styles.postCard} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
       <View style={styles.postHeader}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{post.author[0]}</Text></View>
-        <Text style={styles.postAuthor}>{post.author}</Text>
+        <TouchableOpacity style={styles.authorRow} onPress={onAuthorPress} disabled={!onAuthorPress}>
+          <View style={styles.avatar}><Text style={styles.avatarText}>{post.author[0]}</Text></View>
+          <Text style={styles.postAuthor}>{post.author}</Text>
+        </TouchableOpacity>
         <View style={styles.topicBadge}><Text style={styles.topicBadgeText}>{post.topic}</Text></View>
         <Text style={styles.postDate}>{date}</Text>
       </View>
@@ -67,6 +70,7 @@ export function PostCard({
 const styles = StyleSheet.create({
   postCard: { padding: 20 },
   postHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' },
+  authorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   avatar: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: TLColors.primary, alignItems: 'center', justifyContent: 'center',
