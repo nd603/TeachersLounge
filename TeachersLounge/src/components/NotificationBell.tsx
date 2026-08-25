@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
@@ -9,7 +10,7 @@ export default function NotificationBell() {
   const router = useRouter();
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -20,7 +21,7 @@ export default function NotificationBell() {
         .eq('status', 'pending');
       setCount(n ?? 0);
     })();
-  }, []);
+  }, []));
 
   return (
     <TouchableOpacity onPress={() => router.push('/lounge-requests')} style={styles.wrap}>
