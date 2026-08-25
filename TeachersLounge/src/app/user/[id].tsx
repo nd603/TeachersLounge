@@ -212,13 +212,13 @@ const styles = StyleSheet.create({
   inviteBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: TLColors.primary, borderRadius: 10,
-    paddingHorizontal: 20, paddingVertical: 12, marginBottom: 4,
+    paddingHorizontal: 20, paddingVertical: 12,
   },
   inviteBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
   inviteBtnAccepted: { backgroundColor: '#e8f5e9' },
   inviteBtnPending: {
     borderWidth: 1.5, borderColor: '#ccc', borderRadius: 10,
-    paddingHorizontal: 20, paddingVertical: 12, marginBottom: 4,
+    paddingHorizontal: 20, paddingVertical: 12,
     alignItems: 'center',
   },
   inviteBtnPendingText: { fontSize: 14, color: '#888', fontWeight: '500' },
