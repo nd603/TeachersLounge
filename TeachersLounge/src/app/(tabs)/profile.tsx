@@ -73,10 +73,16 @@ export default function ProfileScreen() {
       setUserId(user.id);
       setEmail(user.email ?? '');
       const meta = user.user_metadata ?? {};
-      setFirstName(meta.first_name ?? '');
-      setLastName(meta.last_name ?? '');
-      setBio(meta.bio ?? '');
-      setCustomUsername(meta.username ?? '');
+      const fn = meta.first_name ?? '';
+      const ln = meta.last_name ?? '';
+      const un = meta.username ?? '';
+      const b = meta.bio ?? '';
+      setFirstName(fn);
+      setLastName(ln);
+      setBio(b);
+      setCustomUsername(un);
+      // Always sync auth metadata to public profiles table
+      await upsertProfile(user.id, { first_name: fn, last_name: ln, username: un, bio: b });
       const members = await getLoungeMembers(user.id);
       setLoungeMembers(members);
       setLoading(false);

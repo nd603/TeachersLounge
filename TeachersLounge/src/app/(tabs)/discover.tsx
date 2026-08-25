@@ -1,15 +1,17 @@
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { TLColors } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
 
-const TEACHERS = [
-  { id: '1', name: 'Matt Rogers', subject: 'Social Studies', grade: '7th Grade', exp: '10+ yrs', initials: 'MR', color: '#3d7ebf' },
-  { id: '2', name: 'Emilie Gray', subject: 'Language Arts', grade: '8th Grade', exp: '10+ yrs', initials: 'EG', color: '#b05e8a' },
-  { id: '3', name: 'Danessa M.', subject: 'Language Arts', grade: '6th Grade', exp: '5+ yrs', initials: 'DM', color: '#8e44ad' },
-  { id: '4', name: 'Jess Williams', subject: 'Social Studies', grade: '8th Grade', exp: '5+ yrs', initials: 'JW', color: '#2c7873' },
-];
+const AVATAR_COLORS = ['#2c7873', '#8e44ad', '#c0392b', '#3d7ebf', '#b05e8a', '#e67e22', '#27ae60'];
+function avatarColor(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = id.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
 
 const GRADE_FILTERS = ['K - 5th', '6th - 8th', '9th - 12th'];
 
@@ -31,6 +33,19 @@ const PODCASTS = [
 
 export default function DiscoverScreen() {
   const router = useRouter();
+  const [teachers, setTeachers] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, username')
+        .neq('id', user?.id ?? '')
+        .limit(6);
+      setTeachers(data ?? []);
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -60,19 +75,24 @@ export default function DiscoverScreen() {
             <Ionicons name="chevron-forward" size={22} color="#666" />
           </TouchableOpacity>
           <View style={styles.teacherGrid}>
-            {TEACHERS.map(t => (
-              <View key={t.id} style={styles.teacherCard}>
-                <View style={[styles.teacherAvatar, { backgroundColor: t.color }]}>
-                  <Text style={styles.teacherInitials}>{t.initials}</Text>
+            {teachers.length === 0 ? (
+              <Text style={{ color: '#aaa', fontStyle: 'italic', fontSize: 13 }}>No other teachers yet</Text>
+            ) : teachers.map(t => {
+              const name = [t.first_name, t.last_name].filter(Boolean).join(' ') || t.username || 'Teacher';
+              const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+              return (
+                <View key={t.id} style={styles.teacherCard}>
+                  <View style={[styles.teacherAvatar, { backgroundColor: avatarColor(t.id) }]}>
+                    <Text style={styles.teacherInitials}>{initials}</Text>
+                  </View>
+                  <Text style={styles.teacherName}>{name}</Text>
+                  {t.username ? <Text style={styles.teacherInfo}>@{t.username}</Text> : null}
+                  <TouchableOpacity style={styles.viewProfileBtn} onPress={() => router.push(`/user/${t.id}`)}>
+                    <Text style={styles.viewProfileText}>View Profile</Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.teacherName}>{t.name}</Text>
-                <Text style={styles.teacherInfo}>{t.subject},{'\n'}{t.grade}</Text>
-                <Text style={styles.teacherExp}>{t.exp} experience</Text>
-                <TouchableOpacity style={styles.viewProfileBtn}>
-                  <Text style={styles.viewProfileText}>View Profile</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
