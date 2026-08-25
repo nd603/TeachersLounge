@@ -16,6 +16,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TLColors } from '@/constants/theme';
 import { ALLOWED_EMAILS } from '@/config/allowedEmails';
 import { signUp } from '@/services/auth';
+import { upsertProfile } from '@/services/lounge';
+import { supabase } from '@/lib/supabase';
 
 const TOTAL_STEPS = 6;
 
@@ -48,6 +50,8 @@ export default function SignupScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [schoolName, setSchoolName] = useState('');
+  const [subject, setSubject] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('');
   const [yearsTeaching, setYearsTeaching] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
 
@@ -84,6 +88,23 @@ export default function SignupScreen() {
         return;
       }
       setLoading(false);
+    }
+
+    if (step === 2) {
+      // Save school/teaching info to profiles table
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const yrs = parseInt(yearsTeaching) || 0;
+        const experience = yrs === 0 ? '' : yrs <= 3 ? '1-3 yrs experience' : yrs <= 7 ? '5+ yrs experience' : '10+ yrs experience';
+        await upsertProfile(user.id, {
+          first_name: firstName,
+          last_name: lastName,
+          subject,
+          grade: gradeLevel,
+          experience,
+          district: schoolName,
+        });
+      }
     }
 
     if (step < TOTAL_STEPS) setStep(step + 1);
@@ -135,20 +156,10 @@ export default function SignupScreen() {
         {step === 2 && (
           <View>
             <Text style={styles.stepTitle}>Sign Up</Text>
-            <Field label="Your School Name*" value="West Valley Middle School" />
-            <View style={styles.field}>
-              <Text style={styles.label}>Subjects You Teach</Text>
-              <View style={styles.tagField}>
-                <View style={styles.tag}><Text style={styles.tagText}>Social Studies ×</Text></View>
-              </View>
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Grade Levels You Teach*</Text>
-              <View style={styles.tagField}>
-                <View style={styles.tag}><Text style={styles.tagText}>7th ×</Text></View>
-              </View>
-            </View>
-            <Field label="How Many Years Have You Been Teaching?" value="1" keyboardType="numeric" />
+            <Field label="Your School / District Name" value={schoolName} onChangeText={setSchoolName} placeholder="e.g. Mecklenburg County Schools" />
+            <Field label="Subjects You Teach" value={subject} onChangeText={setSubject} placeholder="e.g. Social Studies, Math" />
+            <Field label="Grade Levels You Teach" value={gradeLevel} onChangeText={setGradeLevel} placeholder="e.g. 7th Grade, K-5" />
+            <Field label="How Many Years Have You Been Teaching?" value={yearsTeaching} onChangeText={setYearsTeaching} placeholder="e.g. 5" keyboardType="numeric" />
           </View>
         )}
 

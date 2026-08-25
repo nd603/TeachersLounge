@@ -5,8 +5,12 @@ export type ConnectionStatus = 'none' | 'pending_sent' | 'pending_received' | 'a
 export async function upsertProfile(userId: string, data: {
   first_name: string;
   last_name: string;
-  username: string;
+  username?: string;
   bio?: string;
+  subject?: string;
+  grade?: string;
+  experience?: string;
+  district?: string;
 }) {
   return supabase.from('profiles').upsert({ id: userId, ...data, updated_at: new Date().toISOString() });
 }

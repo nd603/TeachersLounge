@@ -63,6 +63,10 @@ export default function ProfileScreen() {
   const [postsLoading, setPostsLoading] = useState(false);
   const [userId, setUserId] = useState('');
   const [customUsername, setCustomUsername] = useState('');
+  const [subject, setSubject] = useState('');
+  const [grade, setGrade] = useState('');
+  const [experience, setExperience] = useState('');
+  const [district, setDistrict] = useState('');
 
   const bioRef = useRef<TextInput>(null);
 
@@ -81,6 +85,12 @@ export default function ProfileScreen() {
       setLastName(ln);
       setBio(b);
       setCustomUsername(un);
+      // Load extra profile fields from profiles table
+      const { data: prof } = await supabase.from('profiles').select('subject, grade, experience, district').eq('id', user.id).maybeSingle();
+      setSubject(prof?.subject ?? '');
+      setGrade(prof?.grade ?? '');
+      setExperience(prof?.experience ?? '');
+      setDistrict(prof?.district ?? '');
       // Always sync auth metadata to public profiles table
       await upsertProfile(user.id, { first_name: fn, last_name: ln, username: un, bio: b });
       const members = await getLoungeMembers(user.id);
@@ -124,7 +134,7 @@ export default function ProfileScreen() {
     setSavingBio(true);
     await Promise.all([
       supabase.auth.updateUser({ data: { bio: draftBio } }),
-      upsertProfile(userId, { first_name: firstName, last_name: lastName, username: customUsername, bio: draftBio }),
+      upsertProfile(userId, { first_name: firstName, last_name: lastName, username: customUsername, bio: draftBio, subject, grade, experience, district }),
     ]);
     setBio(draftBio);
     setEditingBio(false);
@@ -145,7 +155,7 @@ export default function ProfileScreen() {
       supabase.auth.updateUser({
         data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
       }),
-      upsertProfile(userId, { first_name: draftFirstName, last_name: draftLastName, username: draftUsername, bio }),
+      upsertProfile(userId, { first_name: draftFirstName, last_name: draftLastName, username: draftUsername, bio, subject, grade, experience, district }),
       supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId),
       supabase.from('replies').update({ author: newDisplayName }).eq('author_id', userId),
     ]);
@@ -211,12 +221,13 @@ export default function ProfileScreen() {
       </View>
 
       {/* Tag chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll} contentContainerStyle={styles.tagsContent}>
-        <View style={styles.chip}><Text style={styles.chipText}>Social Studies</Text></View>
-        <View style={styles.chip}><Text style={styles.chipText}>7th Grade</Text></View>
-        <View style={styles.chip}><Text style={styles.chipText}>10+ yrs experience</Text></View>
-        <View style={styles.chip}><Text style={styles.chipText}>Mecklenburg Co.</Text></View>
-      </ScrollView>
+      {[subject, grade, experience, district].some(Boolean) && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll} contentContainerStyle={styles.tagsContent}>
+          {[subject, grade, experience, district].filter(Boolean).map(chip => (
+            <View key={chip} style={styles.chip}><Text style={styles.chipText}>{chip}</Text></View>
+          ))}
+        </ScrollView>
+      )}
 
       {/* Bio */}
       <View style={styles.bioSection}>
