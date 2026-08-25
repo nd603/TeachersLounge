@@ -90,7 +90,7 @@ export default function UserProfileScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/discover')}>
             <Ionicons name="arrow-back" size={24} color="#111" />
           </TouchableOpacity>
         </View>
@@ -115,7 +115,7 @@ export default function UserProfileScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/discover')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Ionicons name="arrow-back" size={24} color="#111" />
         </TouchableOpacity>
         <View style={styles.headerIcons}>
