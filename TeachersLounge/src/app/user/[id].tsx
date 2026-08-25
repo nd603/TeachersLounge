@@ -73,20 +73,10 @@ export default function UserProfileScreen() {
     );
   }
 
-  if (!profile) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#111" />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.notFound}>Profile not found</Text>
-      </SafeAreaView>
-    );
-  }
+  // Show a minimal profile even if no profiles row exists yet
+  const resolvedProfile = profile ?? { first_name: '', last_name: '', username: '', bio: '' };
 
-  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Teacher';
+  const fullName = [resolvedProfile.first_name, resolvedProfile.last_name].filter(Boolean).join(' ') || 'Teacher';
   const initials = fullName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
   const color = avatarColor(id ?? '');
 
@@ -147,13 +137,13 @@ export default function UserProfileScreen() {
         {/* Name */}
         <View style={styles.nameSection}>
           <Text style={styles.fullName}>{fullName}</Text>
-          {profile.username ? <Text style={styles.username}>@{profile.username}</Text> : null}
+          {resolvedProfile.username ? <Text style={styles.username}>@{resolvedProfile.username}</Text> : null}
         </View>
 
         {/* Bio */}
-        {profile.bio ? (
+        {resolvedProfile.bio ? (
           <View style={styles.bioSection}>
-            <Text style={styles.bioText}>{profile.bio}</Text>
+            <Text style={styles.bioText}>{resolvedProfile.bio}</Text>
           </View>
         ) : null}
       </ScrollView>

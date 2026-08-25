@@ -12,7 +12,8 @@ export async function upsertProfile(userId: string, data: {
 }
 
 export async function getProfile(userId: string) {
-  return supabase.from('profiles').select('*').eq('id', userId).single();
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+  return { data, error };
 }
 
 export async function sendLoungeRequest(senderId: string, receiverId: string) {
