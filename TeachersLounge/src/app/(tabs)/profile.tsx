@@ -188,36 +188,37 @@ export default function ProfileScreen() {
       {/* Banner */}
       <Image source={require('@/assets/images/profile-banner.png')} style={styles.banner} />
 
-      {/* Avatar + stats row */}
+      {/* Avatar */}
       <View style={styles.avatarRow}>
         <View style={styles.avatarWrap}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
         </View>
-        <View style={styles.statsRow}>
-          <TouchableOpacity style={styles.statItem} onPress={() => setLoungeVisible(true)}>
-            <Text style={styles.statCount}>{loungeMembers.length}</Text>
-            <Text style={styles.statLabel}>My Lounge</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/lounge-requests')}>
-            <Ionicons name="person-add-outline" size={22} color="#111" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => setSettingsVisible(true)}>
-            <Ionicons name="settings-outline" size={24} color="#111" />
-          </TouchableOpacity>
-        </View>
       </View>
 
-      {/* Name & username */}
+      {/* Name, username + lounge/settings */}
       <View style={styles.nameSection}>
         <View style={styles.nameRow}>
-          <Text style={styles.fullName}>{fullName}</Text>
-          <TouchableOpacity onPress={openEditName} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="pencil-outline" size={18} color={TLColors.gray500} />
-          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <View style={styles.nameEditRow}>
+              <Text style={styles.fullName}>{fullName}</Text>
+              <TouchableOpacity onPress={openEditName} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="pencil-outline" size={18} color={TLColors.gray500} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.username}>{username}</Text>
+          </View>
+          <View style={styles.statsRow}>
+            <TouchableOpacity style={styles.statItem} onPress={() => setLoungeVisible(true)}>
+              <Text style={styles.statCount}>{loungeMembers.length}</Text>
+              <Text style={styles.statLabel}>My Lounge</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.settingsBtn} onPress={() => setSettingsVisible(true)}>
+              <Ionicons name="settings-outline" size={24} color="#111" />
+            </TouchableOpacity>
+          </View>
         </View>
-        <Text style={styles.username}>{username}</Text>
       </View>
 
       {/* Tag chips */}
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
   banner: { width: '100%', height: 100, resizeMode: 'cover' },
 
   // Avatar + stats
-  avatarRow: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, marginTop: -36 },
+  avatarRow: { paddingHorizontal: 20, marginTop: -36 },
   avatarWrap: {
     width: 80, height: 80, borderRadius: 40,
     borderWidth: 3, borderColor: '#fff', backgroundColor: '#fff',
@@ -434,7 +435,8 @@ const styles = StyleSheet.create({
 
   // Name
   nameSection: { paddingHorizontal: 20, marginTop: 10 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  nameEditRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   fullName: { fontSize: 20, fontWeight: '700', color: '#111' },
   username: { fontSize: 14, color: TLColors.gray500, marginTop: 2 },
 
