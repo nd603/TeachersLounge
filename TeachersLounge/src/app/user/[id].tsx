@@ -132,20 +132,24 @@ export default function UserProfileScreen() {
         {/* Banner */}
         <Image source={require('@/assets/images/profile-banner.png')} style={styles.banner} />
 
-        {/* Avatar + invite button */}
+        {/* Avatar */}
         <View style={styles.avatarRow}>
           <View style={styles.avatarWrap}>
             <View style={[styles.avatar, { backgroundColor: color }]}>
               <Text style={styles.avatarText}>{initials}</Text>
             </View>
           </View>
-          {renderInviteButton()}
         </View>
 
-        {/* Name + username */}
+        {/* Name + username + invite button */}
         <View style={styles.nameSection}>
-          <Text style={styles.fullName}>{fullName}</Text>
-          {p.username ? <Text style={styles.username}>@{p.username}</Text> : null}
+          <View style={styles.nameRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fullName}>{fullName}</Text>
+              {p.username ? <Text style={styles.username}>@{p.username}</Text> : null}
+            </View>
+            {renderInviteButton()}
+          </View>
         </View>
 
         {/* Tag chips */}
@@ -195,8 +199,7 @@ const styles = StyleSheet.create({
   banner: { width: '100%', height: 130, resizeMode: 'cover' },
 
   avatarRow: {
-    flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between',
-    paddingHorizontal: 20, marginTop: -44, marginBottom: 4,
+    paddingHorizontal: 20, marginTop: -44,
   },
   avatarWrap: {
     width: 88, height: 88, borderRadius: 44,
@@ -224,6 +227,7 @@ const styles = StyleSheet.create({
   inviteBtnPendingText: { fontSize: 14, color: '#888', fontWeight: '500' },
 
   nameSection: { paddingHorizontal: 20, marginTop: 8 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   fullName: { fontSize: 22, fontWeight: '700', color: '#111', marginBottom: 2 },
   username: { fontSize: 15, color: '#555', fontWeight: '500' },
 
