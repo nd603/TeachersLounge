@@ -20,6 +20,14 @@ import { supabase } from '@/lib/supabase';
 import { signOut } from '@/services/auth';
 import { fetchPosts } from '@/services/posts';
 import type { Post } from '@/services/posts';
+import { upsertProfile, getLoungeMembers } from '@/services/lounge';
+
+const AVATAR_COLORS = ['#2c7873', '#8e44ad', '#c0392b', '#3d7ebf', '#b05e8a', '#e67e22', '#27ae60'];
+function avatarColor(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = id.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
 
 const TABS = ['Posts', 'Likes', 'Resources', 'Badges'] as const;
 type Tab = (typeof TABS)[number];
@@ -44,6 +52,8 @@ export default function ProfileScreen() {
   const [savingBio, setSavingBio] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [editNameVisible, setEditNameVisible] = useState(false);
+  const [loungeMembers, setLoungeMembers] = useState<any[]>([]);
+  const [loungeVisible, setLoungeVisible] = useState(false);
   const [draftFirstName, setDraftFirstName] = useState('');
   const [draftLastName, setDraftLastName] = useState('');
   const [draftUsername, setDraftUsername] = useState('');
@@ -67,6 +77,8 @@ export default function ProfileScreen() {
       setLastName(meta.last_name ?? '');
       setBio(meta.bio ?? '');
       setCustomUsername(meta.username ?? '');
+      const members = await getLoungeMembers(user.id);
+      setLoungeMembers(members);
       setLoading(false);
     })();
   }, []);
@@ -104,7 +116,10 @@ export default function ProfileScreen() {
 
   const saveBio = async () => {
     setSavingBio(true);
-    await supabase.auth.updateUser({ data: { bio: draftBio } });
+    await Promise.all([
+      supabase.auth.updateUser({ data: { bio: draftBio } }),
+      upsertProfile(userId, { first_name: firstName, last_name: lastName, username: customUsername, bio: draftBio }),
+    ]);
     setBio(draftBio);
     setEditingBio(false);
     setSavingBio(false);
@@ -124,6 +139,7 @@ export default function ProfileScreen() {
       supabase.auth.updateUser({
         data: { first_name: draftFirstName, last_name: draftLastName, username: draftUsername },
       }),
+      upsertProfile(userId, { first_name: draftFirstName, last_name: draftLastName, username: draftUsername, bio }),
       supabase.from('posts').update({ author: newDisplayName }).eq('author_id', userId),
       supabase.from('replies').update({ author: newDisplayName }).eq('author_id', userId),
     ]);
@@ -164,10 +180,13 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statCount}>14</Text>
+          <TouchableOpacity style={styles.statItem} onPress={() => setLoungeVisible(true)}>
+            <Text style={styles.statCount}>{loungeMembers.length}</Text>
             <Text style={styles.statLabel}>My Lounge</Text>
-          </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/lounge-requests')}>
+            <Ionicons name="person-add-outline" size={22} color="#111" />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.settingsBtn} onPress={() => setSettingsVisible(true)}>
             <Ionicons name="settings-outline" size={24} color="#111" />
           </TouchableOpacity>
@@ -263,6 +282,42 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Lounge members modal */}
+      <Modal visible={loungeVisible} transparent animationType="slide" onRequestClose={() => setLoungeVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setLoungeVisible(false)}>
+          <Pressable style={styles.settingsSheet} onPress={() => {}}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>My Lounge ({loungeMembers.length})</Text>
+            {loungeMembers.length === 0 ? (
+              <Text style={{ color: '#aaa', fontStyle: 'italic', fontSize: 14, marginTop: 8 }}>
+                No one in your lounge yet. Invite teachers from Discover!
+              </Text>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {loungeMembers.map(m => {
+                  const name = [m.first_name, m.last_name].filter(Boolean).join(' ') || m.username || 'Teacher';
+                  const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+                  return (
+                    <TouchableOpacity
+                      key={m.id}
+                      style={styles.loungeRow}
+                      onPress={() => { setLoungeVisible(false); router.push(`/user/${m.id}`); }}>
+                      <View style={[styles.loungeAvatar, { backgroundColor: avatarColor(m.id) }]}>
+                        <Text style={styles.loungeAvatarText}>{initials}</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.loungeName}>{name}</Text>
+                        {m.username ? <Text style={styles.loungeUsername}>@{m.username}</Text> : null}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {/* Settings sheet */}
       <Modal visible={settingsVisible} transparent animationType="slide" onRequestClose={() => setSettingsVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSettingsVisible(false)}>
@@ -431,6 +486,12 @@ const styles = StyleSheet.create({
   postText: { fontSize: 14, color: '#333', lineHeight: 20 },
 
   emptyText: { textAlign: 'center', color: TLColors.gray500, fontSize: 14, marginTop: 40, fontStyle: 'italic' },
+
+  loungeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  loungeAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  loungeAvatarText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  loungeName: { fontSize: 14, fontWeight: '600', color: '#111' },
+  loungeUsername: { fontSize: 12, color: '#888', marginTop: 1 },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   settingsSheet: {

@@ -49,7 +49,7 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/lounge-requests')}><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
