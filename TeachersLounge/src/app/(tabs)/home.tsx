@@ -8,6 +8,7 @@ import { TLColors } from '@/constants/theme';
 import { fetchReplies } from '@/services/replies';
 import { fetchPosts } from '@/services/posts';
 import { getLikeCounts } from '@/services/likes';
+import NotificationBell from '@/components/NotificationBell';
 
 const WEEKLY_PROMPT_KEY = 'weekly-prompt';
 
@@ -49,7 +50,7 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => router.push('/lounge-requests')}><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function MessagesScreen() {
           <Ionicons name="arrow-back" size={24} color="#111" />
         </TouchableOpacity>
         <View style={styles.headerRight}>
-          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>

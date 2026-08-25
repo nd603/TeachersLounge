@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { getProfile, getConnectionStatus, sendLoungeRequest, deleteConnection, type ConnectionStatus } from '@/services/lounge';
+import NotificationBell from '@/components/NotificationBell';
 
 const AVATAR_COLORS = ['#2c7873', '#8e44ad', '#c0392b', '#3d7ebf', '#b05e8a', '#e67e22', '#27ae60'];
 function avatarColor(id: string) {
@@ -119,9 +120,7 @@ export default function UserProfileScreen() {
           <Ionicons name="arrow-back" size={24} color="#111" />
         </TouchableOpacity>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => router.push('/lounge-requests')}>
-            <Ionicons name="notifications-outline" size={24} color="#111" />
-          </TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity onPress={() => router.push('/messages')}>
             <Ionicons name="chatbubble-outline" size={24} color="#111" />
           </TouchableOpacity>

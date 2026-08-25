@@ -22,6 +22,7 @@ import { type Post, fetchPosts, createPost, deletePost } from '@/services/posts'
 import { fetchReplies, createReply } from '@/services/replies';
 import { toggleLike, getLikeCounts, getUserLikedIds } from '@/services/likes';
 import { supabase } from '@/lib/supabase';
+import NotificationBell from '@/components/NotificationBell';
 
 const TABS = ['My Feed', 'Mental Health', 'Free Resources', 'Administration', 'Funny', 'Parents'];
 const TOPICS = ['Mental Health', 'Class Management', 'Administration', 'Resources', 'Funny'];
@@ -324,7 +325,7 @@ export default function ThreadsScreen() {
           <Text style={styles.headerTitle}>{"Teachers'\nLounge"}</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>

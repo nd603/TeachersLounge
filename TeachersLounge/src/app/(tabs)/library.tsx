@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TLColors } from '@/constants/theme';
 import { useSavedResources } from '@/context/SavedResourcesContext';
+import NotificationBell from '@/components/NotificationBell';
 
 type Tab = 'Saved' | 'Boards';
 type Filter = 'All Resources' | 'Lesson Plans' | 'Activities';
@@ -36,7 +37,7 @@ export default function LibraryScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Library</Text>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>

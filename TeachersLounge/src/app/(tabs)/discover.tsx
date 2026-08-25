@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { TLColors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
+import NotificationBell from '@/components/NotificationBell';
 
 const AVATAR_COLORS = ['#2c7873', '#8e44ad', '#c0392b', '#3d7ebf', '#b05e8a', '#e67e22', '#27ae60'];
 function avatarColor(id: string) {
@@ -53,7 +54,7 @@ export default function DiscoverScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Discover</Text>
         <View style={styles.headerIcons}>
-          <TouchableOpacity><Ionicons name="notifications-outline" size={24} color="#111" /></TouchableOpacity>
+          <NotificationBell />
           <TouchableOpacity onPress={() => router.push('/messages')}><Ionicons name="chatbubble-outline" size={24} color="#111" /></TouchableOpacity>
         </View>
       </View>
